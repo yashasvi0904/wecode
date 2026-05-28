@@ -2,8 +2,6 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import Layout from "../../Layout1/Layout";
-import Navbar from "../../Layout1/Navbar";
-import Footer from "../../Layout1/Footer";
 
 const SolvedProblemsList = () => {
   const [submittedQuestions, setSubmittedQuestions] = useState([]);
@@ -14,56 +12,28 @@ const SolvedProblemsList = () => {
   const [draggedNoteIndex, setDraggedNoteIndex] = useState(null);
   const [topicGraphData, setTopicGraphData] = useState({});
 
-  // Styles object for reusable styling
-  const styles = {
-    container: { padding: "2rem", backgroundColor: "#213448", borderRadius: "12px", color: "#ECEFCA", fontFamily: "'Segoe UI', system-ui, sans-serif", boxShadow: "0 8px 32px rgba(0,0,0,0.2)", width: "90%", maxWidth: "1200px", margin: "2rem auto" },
-    sectionTitle: { fontSize: "1.75rem", fontWeight: "600", marginBottom: "1.5rem", color: "#94B4C1", textAlign: "center", textShadow: "0 0 8px rgba(148, 180, 193, 0.3)" },
-    subTitle: { fontSize: "1.25rem", fontWeight: "500", color: "#94B4C1", marginBottom: "1.25rem", textAlign: "center" },
-    card: { backgroundColor: "#547792", borderRadius: "8px", padding: "1.5rem", marginBottom: "2rem", boxShadow: "0 4px 12px rgba(0,0,0,0.15)" },
-    input: { padding: "0.7rem 1rem", borderRadius: "6px", border: "1px solid #94B4C1", backgroundColor: "#213448", color: "#ECEFCA", width: "100%", fontSize: "0.95rem" },
-    button: { padding: "0.7rem 1.2rem", backgroundColor: "#547792", color: "#ECEFCA", border: "none", borderRadius: "6px", cursor: "pointer", fontWeight: "500", boxShadow: "0 0 8px rgba(148, 180, 193, 0.4)", transition: "all 0.2s ease" },
-    deleteButton: { backgroundColor: "#ff4d4d", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer", fontWeight: "500", transition: "all 0.2s ease" },
-    table: { width: "100%", borderCollapse: "separate", borderSpacing: "0", borderRadius: "8px", overflow: "hidden", boxShadow: "0 4px 16px rgba(0,0,0,0.15)" },
-    tableHeader: { background: "#547792", color: "#ECEFCA", textTransform: "uppercase", letterSpacing: "1px", fontWeight: "600", fontSize: "0.9rem" },
-    tableCell: { padding: "14px 16px", borderBottom: "1px solid rgba(148, 180, 193, 0.2)" },
-    select: { backgroundColor: "#213448", color: "#ECEFCA", border: "1px solid #94B4C1", borderRadius: "4px", padding: "8px", width: "100%", cursor: "pointer" },
-    noteCard: { display: "flex", flexDirection: "column", width: "90%", maxWidth: "220px", padding: "1.25rem", margin: "1rem", backgroundColor: "#ECEFCA", color: "#213448", borderRadius: "8px", boxShadow: "0 6px 16px rgba(0,0,0,0.2)", fontWeight: "500", cursor: "grab", transition: "transform 0.2s ease, box-shadow 0.2s ease" }
-  };
-
-  // Combined fetch functions into one useEffect
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch solved questions
         const questionsRes = await axios.get(process.env.REACT_APP_SOLVED_QUESTION, { withCredentials: true });
         const allQuestions = questionsRes.data.questions || [];
         setSubmittedQuestions(allQuestions.filter(q => q.important === true));
-        
-        // Fetch custom lists
         const listsRes = await axios.get(process.env.REACT_APP_CUSTOM_LIST, { withCredentials: true });
         setcustomlist(listsRes.data.customLists);
-        
-        // Fetch topic graph data
         const graphRes = await axios.get(process.env.REACT_APP_QUESTION_GRAPH, { withCredentials: true });
         setTopicGraphData(graphRes.data.topicCount || graphRes.data.titlecount || {});
-      } catch (err) {
-        console.error("Error fetching data:", err);
-      }
+      } catch (err) { console.error("Error fetching data:", err); }
     };
     fetchData();
   }, []);
 
-  // Combined CRUD operations with better error handling
   const createnewcustomlist = async (listname) => {
     if (!listname.trim()) return;
     try {
       await axios.post(process.env.REACT_APP_CREATE_CUSTOM_LIST, { listname }, { withCredentials: true });
       getallcustomlists();
       setNewListName("");
-    } catch (err) {
-      console.error("Error creating custom list:", err);
-      alert("Failed to create list.");
-    }
+    } catch (err) { console.error("Error creating custom list:", err); alert("Failed to create list."); }
   };
 
   const getallcustomlists = async () => {
@@ -107,78 +77,195 @@ const SolvedProblemsList = () => {
     } catch (err) { console.error("Error deleting question from list:", err); }
   };
 
-  // Chart colors for better consistency
-  const CHART_COLORS = ["#547792", "#94B4C1", "#213448", "#ECEFCA", "#6D9CB5", "#385D75", "#B8C4A6", "#82A391"];
+  const CHART_COLORS = ["#6366f1", "#8b5cf6", "#06b6d4", "#10b981", "#f59e0b", "#ef4444", "#a78bfa", "#34d399"];
+
+  const S = {
+    page: { maxWidth: "1200px", margin: "0 auto", padding: "40px 24px 80px" },
+    pageHeader: { textAlign: "center", marginBottom: "40px" },
+    eyebrow: {
+      display: "inline-flex", alignItems: "center", gap: "6px", padding: "5px 12px",
+      background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.18)",
+      borderRadius: "100px", fontSize: "11px", fontWeight: "700", color: "#a5b4fc",
+      textTransform: "uppercase", letterSpacing: "1px", marginBottom: "12px",
+    },
+    pageTitle: { fontSize: "32px", fontWeight: "800", letterSpacing: "-0.8px", color: "#fafafa", margin: "0 0 8px" },
+    card: {
+      background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.07)",
+      borderRadius: "16px", padding: "24px", marginBottom: "20px",
+    },
+    cardTitle: {
+      fontSize: "16px", fontWeight: "700", color: "#fafafa", textAlign: "center",
+      margin: "0 0 20px",
+    },
+    inputRow: { display: "flex", gap: "12px", flexWrap: "wrap" },
+    input: {
+      flex: "3 1 200px", padding: "11px 14px", borderRadius: "10px",
+      border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.04)",
+      color: "#fafafa", fontSize: "14px", outline: "none", fontFamily: "inherit",
+      transition: "border-color 0.2s, box-shadow 0.2s",
+    },
+    btnPrimary: {
+      flex: "1 1 120px", padding: "11px 20px", borderRadius: "10px", border: "none",
+      cursor: "pointer", background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+      color: "#fff", fontWeight: "600", fontSize: "14px", fontFamily: "inherit",
+      boxShadow: "0 4px 14px rgba(99,102,241,0.3)", transition: "opacity 0.2s",
+    },
+    table: { width: "100%", borderCollapse: "separate", borderSpacing: 0, borderRadius: "12px", overflow: "hidden" },
+    tHead: { background: "rgba(99,102,241,0.12)" },
+    th: {
+      padding: "12px 16px", textAlign: "left", fontSize: "11px", fontWeight: "700",
+      color: "#a5b4fc", textTransform: "uppercase", letterSpacing: "1px",
+    },
+    td: { padding: "13px 16px", borderBottom: "1px solid rgba(255,255,255,0.05)", fontSize: "14px", color: "#a1a1aa" },
+    trEven: { background: "rgba(255,255,255,0.02)" },
+    trOdd: { background: "rgba(255,255,255,0.01)" },
+    selectEl: {
+      background: "rgba(255,255,255,0.04)", color: "#fafafa",
+      border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px",
+      padding: "7px 10px", width: "100%", cursor: "pointer", fontFamily: "inherit", fontSize: "13px",
+    },
+    listControlRow: { display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px", flexWrap: "wrap" },
+    btnDanger: {
+      flex: "1 1 140px", padding: "11px 16px", borderRadius: "10px", border: "1px solid rgba(239,68,68,0.3)",
+      cursor: "pointer", background: "rgba(239,68,68,0.08)", color: "#f87171",
+      fontWeight: "600", fontSize: "14px", fontFamily: "inherit", transition: "background 0.2s",
+    },
+    emptyBox: {
+      textAlign: "center", padding: "32px",
+      background: "rgba(255,255,255,0.02)", borderRadius: "10px",
+      border: "1px solid rgba(255,255,255,0.06)",
+    },
+    emptyText: { fontSize: "13px", color: "#52525b", margin: 0 },
+    notesGrid: { display: "flex", flexWrap: "wrap", gap: "14px", justifyContent: "center" },
+    noteCard: {
+      width: "200px", padding: "16px", borderRadius: "12px",
+      background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.2)",
+      cursor: "grab", position: "relative", transition: "box-shadow 0.2s, transform 0.2s",
+    },
+    noteCardDragging: {
+      width: "200px", padding: "16px", borderRadius: "12px",
+      background: "rgba(99,102,241,0.15)", border: "1px solid rgba(99,102,241,0.4)",
+      cursor: "grabbing", position: "relative", transform: "scale(1.04)",
+      boxShadow: "0 12px 32px rgba(99,102,241,0.2)",
+    },
+    noteLabel: { fontSize: "11px", fontWeight: "700", color: "#a5b4fc", textTransform: "uppercase", letterSpacing: "0.6px", marginBottom: "6px" },
+    noteValue: { fontSize: "14px", color: "#fafafa", fontWeight: "500" },
+    noteDeleteBtn: {
+      position: "absolute", top: "8px", right: "8px",
+      background: "rgba(239,68,68,0.15)", border: "1px solid rgba(239,68,68,0.3)",
+      borderRadius: "50%", width: "24px", height: "24px",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      fontSize: "14px", fontWeight: "bold", cursor: "pointer", color: "#f87171",
+      lineHeight: 1,
+    },
+  };
 
   return (
     <Layout>
-      <div style={styles.container}>
-        <h2 style={styles.sectionTitle}>📘 Important Questions Dashboard</h2>
-        
-        {/* Analytics Section */}
+      <style>{`
+        .spl-input:focus { border-color: rgba(99,102,241,0.5) !important; box-shadow: 0 0 0 3px rgba(99,102,241,0.1) !important; }
+        .spl-select option { background: #111118; color: #fafafa; }
+        .spl-danger-btn:hover { background: rgba(239,68,68,0.15) !important; }
+        .spl-primary-btn:hover { opacity: 0.9; }
+        .spl-note-card:hover { box-shadow: 0 8px 24px rgba(99,102,241,0.15); transform: translateY(-2px); }
+      `}</style>
+
+      <div style={S.page}>
+        <div style={S.pageHeader}>
+          <div style={S.eyebrow}>✦ Progress</div>
+          <h1 style={S.pageTitle}>📘 Important Questions Dashboard</h1>
+        </div>
+
+        {/* Analytics */}
         {Object.keys(topicGraphData).length > 0 && (
-          <div style={{ ...styles.card, marginBottom: "2.5rem" }}>
-            <h3 style={styles.subTitle}>📊 Topic Analysis</h3>
-            <div style={{ width: "100%", height: 400, margin: "1rem auto" }}>
+          <div style={S.card}>
+            <h3 style={S.cardTitle}>📊 Topic Analysis</h3>
+            <div style={{ width: "100%", height: 360 }}>
               <ResponsiveContainer>
                 <PieChart>
-                  <Pie data={Object.entries(topicGraphData).map(([name, value]) => ({ name, value }))}
-                    dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={130} fill="#8884d8"
-                    labelLine={false} label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}>
+                  <Pie
+                    data={Object.entries(topicGraphData).map(([name, value]) => ({ name, value }))}
+                    dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={130}
+                    labelLine={false}
+                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                    style={{ fontSize: "12px", fill: "#a1a1aa" }}
+                  >
                     {Object.keys(topicGraphData).map((_, index) => (
                       <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value, name) => [`${value} question${value !== 1 ? 's' : ''}`, name]} />
-                  <Legend layout="horizontal" verticalAlign="bottom" align="center" />
+                  <Tooltip
+                    contentStyle={{ background: "#111118", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "10px", color: "#fafafa" }}
+                    formatter={(value, name) => [`${value} question${value !== 1 ? 's' : ''}`, name]}
+                  />
+                  <Legend wrapperStyle={{ color: "#a1a1aa", fontSize: "13px" }} />
                 </PieChart>
               </ResponsiveContainer>
             </div>
           </div>
         )}
 
-        {/* Create List Section */}
-        <div style={styles.card}>
-          <h3 style={styles.subTitle}>📁 Create Custom List</h3>
-          <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
-            <input type="text" placeholder="Enter list name" value={newListName} 
-              onChange={(e) => setNewListName(e.target.value)} style={{ ...styles.input, flex: "3 1 200px" }} />
-            <button onClick={() => createnewcustomlist(newListName)} 
-              style={{ ...styles.button, flex: "1 1 120px", backgroundColor: "#94B4C1", color: "#213448", fontWeight: "600" }}>
+        {/* Create List */}
+        <div style={S.card}>
+          <h3 style={S.cardTitle}>📁 Create Custom List</h3>
+          <div style={S.inputRow}>
+            <input
+              type="text" placeholder="Enter list name..." value={newListName}
+              onChange={(e) => setNewListName(e.target.value)}
+              className="spl-input" style={S.input}
+            />
+            <button
+              onClick={() => createnewcustomlist(newListName)}
+              className="spl-primary-btn" style={S.btnPrimary}
+            >
               Create List
             </button>
           </div>
         </div>
 
         {/* Important Questions Table */}
-        <div style={{ ...styles.card, marginTop: "2rem" }}>
-          <h3 style={styles.subTitle}>⭐ Important Questions</h3>
+        <div style={S.card}>
+          <h3 style={S.cardTitle}>⭐ Important Questions</h3>
           {submittedQuestions.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "2rem", backgroundColor: "rgba(148, 180, 193, 0.1)", borderRadius: "8px" }}>
-              <p style={{ color: "#94B4C1" }}>No important questions marked yet. Questions you mark as important will appear here.</p>
+            <div style={S.emptyBox}>
+              <p style={{ fontSize: "1.5rem", margin: "0 0 10px" }}>📋</p>
+              <p style={{ fontSize: "14px", color: "#a1a1aa", margin: "0 0 4px" }}>No important questions marked yet.</p>
+              <p style={S.emptyText}>Questions you mark as important will appear here.</p>
             </div>
           ) : (
             <div style={{ width: "100%", overflowX: "auto" }}>
-              <table style={styles.table}>
-                <thead>
-                  <tr style={styles.tableHeader}>
-                    <th style={{ ...styles.tableCell, width: "20%" }}>Question ID</th>
-                    <th style={{ ...styles.tableCell, width: "15%" }}>Status</th>
-                    <th style={{ ...styles.tableCell, width: "20%" }}>Date</th>
-                    <th style={{ ...styles.tableCell, width: "20%" }}>Time</th>
-                    <th style={{ ...styles.tableCell, width: "25%" }}>Actions</th>
+              <table style={S.table}>
+                <thead style={S.tHead}>
+                  <tr>
+                    <th style={S.th}>Question ID</th>
+                    <th style={S.th}>Status</th>
+                    <th style={S.th}>Date</th>
+                    <th style={S.th}>Time</th>
+                    <th style={S.th}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {submittedQuestions.map((q, idx) => (
-                    <tr key={idx} style={{ backgroundColor: idx % 2 === 0 ? "rgba(84, 119, 146, 0.6)" : "rgba(84, 119, 146, 0.8)" }}>
-                      <td style={{ ...styles.tableCell, fontWeight: "500" }}>{q.questionId}</td>
-                      <td style={styles.tableCell}>{q.important ? "✅ Yes" : "❌ No"}</td>
-                      <td style={styles.tableCell}>{q.timestamp ? new Date(q.timestamp).toLocaleDateString() : "N/A"}</td>
-                      <td style={styles.tableCell}>{q.timestamp ? new Date(q.timestamp).toLocaleTimeString() : "N/A"}</td>
-                      <td style={styles.tableCell}>
-                        <select defaultValue="" onChange={(e) => addquestiontocustomlist(e.target.value, q.questionId)}
-                          style={styles.select}>
+                    <tr key={idx} style={idx % 2 === 0 ? S.trEven : S.trOdd}>
+                      <td style={{ ...S.td, fontWeight: "600", color: "#fafafa" }}>{q.questionId}</td>
+                      <td style={S.td}>
+                        <span style={{
+                          padding: "3px 10px", borderRadius: "100px", fontSize: "12px", fontWeight: "600",
+                          background: q.important ? "rgba(16,185,129,0.12)" : "rgba(239,68,68,0.12)",
+                          color: q.important ? "#34d399" : "#f87171",
+                          border: `1px solid ${q.important ? "rgba(16,185,129,0.2)" : "rgba(239,68,68,0.2)"}`,
+                        }}>
+                          {q.important ? "✓ Yes" : "✗ No"}
+                        </span>
+                      </td>
+                      <td style={S.td}>{q.timestamp ? new Date(q.timestamp).toLocaleDateString() : "N/A"}</td>
+                      <td style={S.td}>{q.timestamp ? new Date(q.timestamp).toLocaleTimeString() : "N/A"}</td>
+                      <td style={S.td}>
+                        <select
+                          defaultValue=""
+                          onChange={(e) => addquestiontocustomlist(e.target.value, q.questionId)}
+                          className="spl-select" style={S.selectEl}
+                        >
                           <option value="" disabled>Add to list...</option>
                           {customlist.map((list) => (
                             <option key={list._id} value={list._id}>{list.name}</option>
@@ -193,35 +280,42 @@ const SolvedProblemsList = () => {
           )}
         </div>
 
-        {/* Saved Lists Section */}
-        <div style={{ ...styles.card, marginTop: "2rem" }}>
-          <h3 style={styles.subTitle}>📂 Saved Lists</h3>
-          <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1.5rem", flexWrap: "wrap" }}>
-            <select id="list-view-selector" defaultValue="" onChange={(e) => viewcustomlist(e.target.value)}
-              style={{ ...styles.select, flex: "3 1 300px", padding: "0.8rem 1rem" }}>
+        {/* Saved Lists */}
+        <div style={S.card}>
+          <h3 style={S.cardTitle}>📂 Saved Lists</h3>
+          <div style={S.listControlRow}>
+            <select
+              id="list-view-selector" defaultValue=""
+              onChange={(e) => viewcustomlist(e.target.value)}
+              className="spl-select"
+              style={{ ...S.selectEl, flex: "3 1 300px", padding: "11px 14px" }}
+            >
               <option disabled value="">Select a list to view</option>
               {customlist.map((list) => (
                 <option key={list._id} value={list._id}>{list.name}</option>
               ))}
             </select>
             {customlist.length > 0 && (
-              <button onClick={() => {
-                const listId = document.getElementById("list-view-selector").value;
-                if (listId && window.confirm("Are you sure you want to delete this list?")) {
-                  deletecustomlist(listId);
-                }
-              }} style={{ ...styles.deleteButton, flex: "1 1 150px", padding: "0.8rem 1rem" }}>
+              <button
+                className="spl-danger-btn" style={S.btnDanger}
+                onClick={() => {
+                  const listId = document.getElementById("list-view-selector").value;
+                  if (listId && window.confirm("Are you sure you want to delete this list?")) {
+                    deletecustomlist(listId);
+                  }
+                }}
+              >
                 Delete List
               </button>
             )}
           </div>
 
-          {/* List Items Display */}
           {selectedListId ? (
             showcustomlistquestions.length > 0 ? (
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem", justifyContent: "center" }}>
+              <div style={S.notesGrid}>
                 {showcustomlistquestions.map((q, idx) => (
-                  <div key={idx} draggable
+                  <div
+                    key={idx} draggable
                     onDragStart={() => setDraggedNoteIndex(idx)}
                     onDragOver={(e) => e.preventDefault()}
                     onDrop={() => {
@@ -233,37 +327,26 @@ const SolvedProblemsList = () => {
                         setDraggedNoteIndex(null);
                       }
                     }}
-                    style={{
-                      ...styles.noteCard,
-                      transform: draggedNoteIndex === idx ? "scale(1.05)" : "scale(1)",
-                      position: "relative"
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.boxShadow = "0 8px 24px rgba(0,0,0,0.3)"}
-                    onMouseLeave={(e) => e.currentTarget.style.boxShadow = "0 6px 16px rgba(0,0,0,0.2)"}
+                    className="spl-note-card"
+                    style={draggedNoteIndex === idx ? S.noteCardDragging : S.noteCard}
                   >
-                    <div style={{ marginBottom: "0.5rem", fontWeight: "600" }}>Question ID:</div>
-                    <div>{q}</div>
-                    <button onClick={() => deletequestionfromcustomlist(selectedListId, q)}
-                      style={{
-                        position: "absolute", top: "8px", right: "8px",
-                        backgroundColor: "#ff4444", color: "#fff", border: "none",
-                        borderRadius: "50%", width: "28px", height: "28px",
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        fontSize: "1rem", fontWeight: "bold", cursor: "pointer"
-                      }}>
-                      ×
-                    </button>
+                    <div style={S.noteLabel}>Question ID</div>
+                    <div style={S.noteValue}>{q}</div>
+                    <button
+                      onClick={() => deletequestionfromcustomlist(selectedListId, q)}
+                      style={S.noteDeleteBtn}
+                    >×</button>
                   </div>
                 ))}
               </div>
             ) : (
-              <div style={{ textAlign: "center", padding: "2rem", backgroundColor: "rgba(148, 180, 193, 0.1)", borderRadius: "8px" }}>
-                <p style={{ color: "#94B4C1" }}>This list is empty. Add questions from your important questions table above.</p>
+              <div style={S.emptyBox}>
+                <p style={S.emptyText}>This list is empty. Add questions from the table above.</p>
               </div>
             )
           ) : (
-            <div style={{ textAlign: "center", padding: "2rem", backgroundColor: "rgba(148, 180, 193, 0.1)", borderRadius: "8px" }}>
-              <p style={{ color: "#94B4C1" }}>Select a list above to view its contents.</p>
+            <div style={S.emptyBox}>
+              <p style={S.emptyText}>Select a list above to view its contents.</p>
             </div>
           )}
         </div>

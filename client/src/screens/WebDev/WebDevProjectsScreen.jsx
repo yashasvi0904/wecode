@@ -1,12 +1,11 @@
 import React, { useState } from "react";
 import Layout from "../../Layout1/Layout";
-import Navbar from "../../Layout1/Navbar";
 
 const WebDevProjectsScreen = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false), [selectedProject, setSelectedProject] = useState(null);
-  
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedProject, setSelectedProject] = useState(null);
+
   const projectData = [
-    // Beginner-Friendly Projects (HTML, CSS, JavaScript)
     { title: "Personal Portfolio Website", hint: "A basic website to showcase your skills and projects.", requirements: "HTML, CSS, JavaScript.", useCase: "Create a polished personal portfolio.", targetUsers: "5K+", targetAudience: "Job seekers, developers." },
     { title: "Simple Calculator", hint: "A basic calculator with addition, subtraction, multiplication, and division.", requirements: "HTML, CSS, JavaScript.", useCase: "Build a simple calculator to perform basic arithmetic operations.", targetUsers: "20K+", targetAudience: "General public, students." },
     { title: "To-Do List App", hint: "A simple task management application.", requirements: "HTML, CSS, JavaScript.", useCase: "Allow users to add, edit, and delete tasks.", targetUsers: "15K+", targetAudience: "Students, working professionals." },
@@ -23,8 +22,6 @@ const WebDevProjectsScreen = () => {
     { title: "Password Strength Meter", hint: "A tool that provides feedback on password strength.", requirements: "HTML, CSS, JavaScript.", useCase: "Help users create strong passwords by providing feedback on their input.", targetUsers: "10K+", targetAudience: "General public, developers." },
     { title: "Custom Range Slider", hint: "A custom slider component.", requirements: "HTML, CSS, JavaScript.", useCase: "Allow users to select values within a specified range.", targetUsers: "5K+", targetAudience: "Developers, UI designers." },
     { title: "Netflix Mobile Navigation", hint: "A clone of the Netflix mobile navigation.", requirements: "HTML, CSS, JavaScript.", useCase: "Replicate Netflix's mobile navigation for learning purposes.", targetUsers: "30K+", targetAudience: "Web developers, UI/UX enthusiasts." },
-
-    // Intermediate Projects (More Complexity)
     { title: "Expense Tracker", hint: "A more advanced app to track and manage personal expenses.", requirements: "HTML, CSS, JavaScript, Local Storage or Firebase.", useCase: "Track personal expenses and visualize them with charts.", targetUsers: "50K+", targetAudience: "Individuals, families, financial planners." },
     { title: "E-commerce Website", hint: "A simple online store with product listing, checkout, and payment options.", requirements: "HTML, CSS, JavaScript, Node.js, Stripe API.", useCase: "Create an online store to showcase products and accept payments.", targetUsers: "100K+", targetAudience: "Shoppers, online retailers." },
     { title: "Library Management System", hint: "A system to manage library books and users.", requirements: "HTML, CSS, JavaScript, MongoDB.", useCase: "Allow users to manage books, borrow, and return items.", targetUsers: "20K+", targetAudience: "Libraries, schools." },
@@ -33,8 +30,6 @@ const WebDevProjectsScreen = () => {
     { title: "Restaurant Website", hint: "A website to showcase a restaurant's menu, location, and contact information.", requirements: "HTML, CSS, JavaScript, Google Maps API.", useCase: "Showcase restaurant details and menu items.", targetUsers: "20K+", targetAudience: "Restaurant owners, customers." },
     { title: "Online Code Editor", hint: "A web-based code editor with syntax highlighting and code completion.", requirements: "React, JavaScript, Monaco Editor, Node.js.", useCase: "Create an online code editor with syntax highlighting and code completion.", targetUsers: "50K+", targetAudience: "Developers, coders." },
     { title: "Chatbot App", hint: "A basic chatbot that can respond to user queries.", requirements: "HTML, CSS, JavaScript, Dialogflow API.", useCase: "Create an interactive chatbot for answering user questions.", targetUsers: "20K+", targetAudience: "Businesses, customer service." },
-
-    // Advanced Projects (Full-Stack, Frameworks)
     { title: "Online Learning Management System (LMS)", hint: "A platform for online courses, lessons, and assessments.", requirements: "React, Node.js, MongoDB, JWT for authentication.", useCase: "Provide a platform for instructors and students to interact and learn.", targetUsers: "100K+", targetAudience: "Educators, students." },
     { title: "E-commerce Platform with Advanced Features", hint: "A full-fledged e-commerce platform with features like user accounts, shopping carts, payment gateways, and order management.", requirements: "React, Node.js, MongoDB, Stripe/PayPal API.", useCase: "Create a complete e-commerce platform with advanced features.", targetUsers: "200K+", targetAudience: "Shoppers, retailers." },
     { title: "Blockchain-based Application", hint: "A project that utilizes blockchain technology, such as a decentralized voting system or a digital identity platform.", requirements: "React, Node.js, Solidity (Ethereum).", useCase: "Implement a decentralized app using blockchain technology.", targetUsers: "100K+", targetAudience: "Tech enthusiasts, blockchain developers." },
@@ -59,66 +54,120 @@ const WebDevProjectsScreen = () => {
   const handleClickProject = (project) => { setSelectedProject(project); setIsModalOpen(true); };
   const handleCloseModal = () => { setIsModalOpen(false); setSelectedProject(null); };
 
-  // Styles as objects to improve readability and performance
-  const styles = {
-    container: { padding: "40px", color: "#ECEFCA", maxWidth: "1400px", margin: "0 auto" },
-    header: { textAlign: "center", marginBottom: "40px", fontSize: "2.5rem", fontWeight: "700", color: "#ECEFCA", borderBottom: "3px solid #547792", paddingBottom: "15px" },
-    sectionTitle: { fontSize: "1.8rem", margin: "40px 0 25px", color: "#94B4C1", borderLeft: "5px solid #547792", paddingLeft: "15px" },
-    grid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "25px" },
-    card: { backgroundColor: "#213448", padding: "25px", borderRadius: "12px", boxShadow: "0 8px 15px rgba(0, 0, 0, 0.15)", transition: "transform 0.3s, box-shadow 0.3s", cursor: "pointer", height: "100%", display: "flex", flexDirection: "column", justifyContent: "space-between", border: "1px solid rgba(84, 119, 146, 0.3)" },
-    cardHover: { transform: "translateY(-5px)", boxShadow: "0 12px 20px rgba(0, 0, 0, 0.2)" },
-    cardTitle: { color: "#ECEFCA", fontSize: "1.3rem", marginBottom: "15px", borderBottom: "2px solid #547792", paddingBottom: "10px" },
-    cardDesc: { color: "#94B4C1", fontSize: "0.95rem", lineHeight: "1.5" },
-    modal: { position: "fixed", top: "0", left: "0", width: "100%", height: "100%", backgroundColor: "rgba(0, 0, 0, 0.7)", backdropFilter: "blur(8px)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000 },
-    modalContent: { backgroundColor: "#213448", padding: "35px", borderRadius: "12px", maxWidth: "600px", width: "90%", color: "#ECEFCA", cursor: "auto", boxShadow: "0 15px 30px rgba(0, 0, 0, 0.3)", border: "1px solid #547792" },
-    modalTitle: { fontSize: "1.8rem", marginBottom: "20px", color: "#ECEFCA", borderBottom: "2px solid #547792", paddingBottom: "10px" },
-    modalDetail: { margin: "15px 0", color: "#94B4C1", fontSize: "1rem", lineHeight: "1.6" },
-    button: { marginTop: "25px", padding: "12px 20px", backgroundColor: "#547792", border: "none", borderRadius: "8px", color: "#ECEFCA", cursor: "pointer", fontWeight: "600", transition: "background-color 0.3s", width: "100%" },
-    buttonHover: { backgroundColor: "#638ca4" }
+  const S = {
+    page: { maxWidth: "1300px", margin: "0 auto", padding: "40px 24px 80px" },
+    hero: { marginBottom: "48px" },
+    eyebrow: {
+      display: "inline-flex", alignItems: "center", gap: "6px", padding: "5px 12px",
+      background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.18)",
+      borderRadius: "100px", fontSize: "11px", fontWeight: "700", color: "#a5b4fc",
+      textTransform: "uppercase", letterSpacing: "1px", marginBottom: "12px",
+    },
+    heroTitle: { fontSize: "36px", fontWeight: "800", letterSpacing: "-1px", color: "#fafafa", margin: "0 0 10px" },
+    heroSub: { fontSize: "15px", color: "#a1a1aa", margin: 0 },
+    sectionTitle: {
+      fontSize: "18px", fontWeight: "700", color: "#fafafa", margin: "0 0 20px",
+      paddingLeft: "12px", borderLeft: "3px solid #6366f1", display: "flex", alignItems: "center",
+    },
+    grid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "18px" },
+    card: {
+      background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.07)",
+      borderRadius: "14px", padding: "22px", cursor: "pointer",
+      transition: "border-color 0.3s, box-shadow 0.3s, transform 0.3s",
+      display: "flex", flexDirection: "column",
+    },
+    cardTitle: { fontSize: "15px", fontWeight: "700", color: "#fafafa", margin: "0 0 10px", lineHeight: "1.4" },
+    cardDesc: { fontSize: "13px", color: "#a1a1aa", lineHeight: "1.6", flex: 1 },
+    cardArrow: {
+      marginTop: "14px", fontSize: "12px", color: "#6366f1", fontWeight: "600",
+      paddingTop: "12px", borderTop: "1px solid rgba(255,255,255,0.06)", textAlign: "right",
+    },
+    overlay: {
+      position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
+      background: "rgba(0,0,0,0.7)", backdropFilter: "blur(12px)",
+      display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000,
+    },
+    modal: {
+      background: "#111118", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "20px",
+      padding: "32px", maxWidth: "580px", width: "90%",
+      cursor: "auto", boxShadow: "0 40px 80px rgba(0,0,0,0.6)",
+    },
+    modalTitle: {
+      fontSize: "20px", fontWeight: "800", color: "#fafafa", margin: "0 0 22px",
+      paddingBottom: "16px", borderBottom: "1px solid rgba(255,255,255,0.07)",
+    },
+    detailRow: { marginBottom: "14px" },
+    detailLabel: { fontSize: "11px", fontWeight: "700", color: "#a5b4fc", textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: "4px" },
+    detailValue: { fontSize: "14px", color: "#a1a1aa", lineHeight: "1.6" },
+    closeBtn: {
+      marginTop: "24px", width: "100%", padding: "12px", borderRadius: "10px", border: "none",
+      cursor: "pointer", background: "linear-gradient(135deg, #6366f1, #8b5cf6)", color: "#fff",
+      fontWeight: "600", fontSize: "14px", fontFamily: "inherit",
+      boxShadow: "0 4px 16px rgba(99,102,241,0.3)",
+    },
   };
 
   return (
     <Layout>
-      <Navbar />
-      <div style={styles.container}>
-        <h1 style={styles.header}>Web Development Project Ideas</h1>
-        
-        <section>
-          <h2 style={styles.sectionTitle}>Project Collection</h2>
-          <div style={styles.grid}>
-            {projectData.map((project, index) => (
-              <div key={index} onClick={() => handleClickProject(project)} 
-                   onMouseOver={(e) => {e.currentTarget.style.transform = styles.cardHover.transform; e.currentTarget.style.boxShadow = styles.cardHover.boxShadow}} 
-                   onMouseOut={(e) => {e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = styles.card.boxShadow}}
-                   style={styles.card}>
-                <h3 style={styles.cardTitle}>{project.title}</h3>
-                <p style={styles.cardDesc}>{project.hint}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-        
-        {isModalOpen && selectedProject && (
-          <div style={styles.modal} onClick={handleCloseModal}>
-            <div style={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-              <h3 style={styles.modalTitle}>{selectedProject.title}</h3>
-              <div style={{marginBottom: "20px"}}>
-                <p style={styles.modalDetail}><strong>Description:</strong> {selectedProject.hint}</p>
-                <p style={styles.modalDetail}><strong>Requirements:</strong> {selectedProject.requirements}</p>
-                <p style={styles.modalDetail}><strong>Use Case:</strong> {selectedProject.useCase}</p>
-                <p style={styles.modalDetail}><strong>Target Users:</strong> {selectedProject.targetUsers}</p>
-                <p style={styles.modalDetail}><strong>Target Audience:</strong> {selectedProject.targetAudience}</p>
-              </div>
-              <button onClick={handleCloseModal} 
-                      onMouseOver={(e) => e.currentTarget.style.backgroundColor = styles.buttonHover.backgroundColor} 
-                      onMouseOut={(e) => e.currentTarget.style.backgroundColor = styles.button.backgroundColor}
-                      style={styles.button}>
-                Close
-              </button>
+      <style>{`
+        .wp-card:hover { border-color: rgba(99,102,241,0.3) !important; box-shadow: 0 12px 32px rgba(99,102,241,0.08) !important; transform: translateY(-4px) !important; }
+        .wp-modal-overlay { animation: wpFade 0.2s ease; }
+        .wp-modal { animation: wpSlide 0.25s ease; }
+        @keyframes wpFade { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes wpSlide { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+      `}</style>
+
+      <div style={S.page}>
+        <div style={S.hero}>
+          <div style={S.eyebrow}>✦ Project Ideas</div>
+          <h1 style={S.heroTitle}>Web Development Project Ideas</h1>
+          <p style={S.heroSub}>From beginner-friendly to advanced full-stack projects — find your next build.</p>
+        </div>
+
+        <div style={{ marginBottom: "12px" }}>
+          <h2 style={S.sectionTitle}>Project Collection</h2>
+        </div>
+        <div style={S.grid}>
+          {projectData.map((project, index) => (
+            <div key={index} className="wp-card" style={S.card} onClick={() => handleClickProject(project)}>
+              <h3 style={S.cardTitle}>{project.title}</h3>
+              <p style={S.cardDesc}>{project.hint}</p>
+              <div style={S.cardArrow}>View Details →</div>
             </div>
-          </div>
-        )}
+          ))}
+        </div>
       </div>
+
+      {isModalOpen && selectedProject && (
+        <div className="wp-modal-overlay" style={S.overlay} onClick={handleCloseModal}>
+          <div className="wp-modal" style={S.modal} onClick={(e) => e.stopPropagation()}>
+            <h3 style={S.modalTitle}>{selectedProject.title}</h3>
+            <div style={S.detailRow}>
+              <p style={S.detailLabel}>Description</p>
+              <p style={S.detailValue}>{selectedProject.hint}</p>
+            </div>
+            <div style={S.detailRow}>
+              <p style={S.detailLabel}>Requirements</p>
+              <p style={S.detailValue}>{selectedProject.requirements}</p>
+            </div>
+            <div style={S.detailRow}>
+              <p style={S.detailLabel}>Use Case</p>
+              <p style={S.detailValue}>{selectedProject.useCase}</p>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
+              <div style={S.detailRow}>
+                <p style={S.detailLabel}>Target Users</p>
+                <p style={S.detailValue}>{selectedProject.targetUsers}</p>
+              </div>
+              <div style={S.detailRow}>
+                <p style={S.detailLabel}>Target Audience</p>
+                <p style={S.detailValue}>{selectedProject.targetAudience}</p>
+              </div>
+            </div>
+            <button style={S.closeBtn} onClick={handleCloseModal}>Close</button>
+          </div>
+        </div>
+      )}
     </Layout>
   );
 };

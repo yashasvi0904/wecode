@@ -10,7 +10,6 @@ const FollowDashboard = () => {
   const [showProfile, setShowProfile] = useState(false), [searchResults, setSearchResults] = useState([]), [selectedUser, setSelectedUser] = useState(null);
   const dropdownRef = useRef(null), [profileimage, setProfileimage] = useState(""), [recentSearches, setRecentSearches] = useState([]);
 
-  // Sample users to show as flashcards before any search is clicked
   const sampleUsers = [
     { _id: "sample1", name: "APJ Abdul Kalam", profileimage: "https://api.dicebear.com/7.x/micah/svg?seed=APJAbdulKalam" },
     { _id: "sample2", name: "Sachin Tendulkar", profileimage: "https://api.dicebear.com/7.x/micah/svg?seed=SachinTendulkar" },
@@ -24,7 +23,6 @@ const FollowDashboard = () => {
     { _id: "sample10", name: "Lata Mangeshkar", profileimage: "https://api.dicebear.com/7.x/micah/svg?seed=LataMangeshkar" }
   ];
 
-  // Fetch the current user's name and follow counts
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -41,51 +39,41 @@ const FollowDashboard = () => {
     fetchUserData();
     if (followedName) checkFollowingStatus();
   }, [followedName]);
-    
-  // Check if the user is already following the followed user
+
   const checkFollowingStatus = async () => {
     if (!followingName || !followedName) return;
     try {
-      const response = await axios.post(process.env.REACT_APP_CHECK_FOLLOWING, 
+      const response = await axios.post(process.env.REACT_APP_CHECK_FOLLOWING,
         { following_name: followingName, followed_name: followedName }, { withCredentials: true });
       setIsFollowing(response.data.isFollowing);
-    } catch (error) {
-      console.error("Error checking following status:", error);
-    }
+    } catch (error) { console.error("Error checking following status:", error); }
   };
 
-  // Handle following a user
   const handleFollow = async () => {
     try {
       const response = await axios.post(process.env.REACT_APP_FOLLOW,
         { following_name: followingName, followed_name: followedName }, { withCredentials: true });
       setMessage(response.data.message);
       setIsFollowing(true);
-    } catch (error) {
-      setMessage(error.response?.data?.message || "Error following user");
-    }
+    } catch (error) { setMessage(error.response?.data?.message || "Error following user"); }
   };
-  
+
   const handleUnfollow = async () => {
     try {
       const response = await axios.post(process.env.REACT_APP_UNFOLLOW,
         { following_name: followingName, followed_name: followedName }, { withCredentials: true });
       setMessage(response.data.message);
       checkFollowingStatus();
-    } catch (error) {
-      setMessage(error.response?.data?.message || "Error unfollowing user");
-    }
+    } catch (error) { setMessage(error.response?.data?.message || "Error unfollowing user"); }
   };
-  
+
   const debouncedSearchUsers = useCallback(debounce(async (query) => {
     try {
       const res = await axios.get(`${process.env.REACT_APP_SEARCH_USERS}?searchQuery=${query}`, { withCredentials: true });
       setSearchResults(res.data?.users || []);
-    } catch (error) {
-      console.error("Error searching users:", error);
-    }
+    } catch (error) { console.error("Error searching users:", error); }
   }, 400), []);
-  
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) setSearchResults([]);
@@ -110,21 +98,43 @@ const FollowDashboard = () => {
   const renderUserCard = (user, isSearchResult = false) => (
     <motion.div
       key={user._id}
-      initial={{ opacity: 0, scale: 0.9 }}
+      initial={{ opacity: 0, scale: 0.92 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.17 }}
-      className={`user-card ${isSearchResult ? 'search-result-card' : 'sample-card'}`}
       onClick={() => handleUserSelect(user)}
       whileHover={{ scale: 1.03 }}
+      style={{
+        background: isSearchResult ? "rgba(255,255,255,0.03)" : "rgba(255,255,255,0.025)",
+        border: "1px solid rgba(255,255,255,0.08)",
+        borderRadius: "12px", padding: isSearchResult ? "10px" : "18px",
+        textAlign: "center", cursor: "pointer", display: "flex",
+        flexDirection: "column", alignItems: "center",
+        transition: "border-color 0.2s, box-shadow 0.2s",
+      }}
+      className="fd-user-card"
     >
       <img
         src={user.profileimage || `https://api.dicebear.com/7.x/micah/svg?seed=${user.name}`}
         alt={user.name}
-        className="user-avatar"
+        style={{
+          width: isSearchResult ? "44px" : "60px", height: isSearchResult ? "44px" : "60px",
+          borderRadius: "50%", objectFit: "cover", marginBottom: "8px",
+          border: "2px solid rgba(99,102,241,0.3)",
+        }}
       />
-      <div className="user-name">{user.name}</div>
+      <div style={{ fontSize: isSearchResult ? "12px" : "14px", fontWeight: "600", color: "#fafafa", marginBottom: isSearchResult ? "2px" : "10px" }}>
+        {user.name}
+      </div>
       {!isSearchResult && (
-        <button className="view-profile-btn">
+        <button
+          style={{
+            padding: "5px 14px", background: "rgba(99,102,241,0.1)",
+            border: "1px solid rgba(99,102,241,0.25)", borderRadius: "6px",
+            color: "#a5b4fc", fontSize: "12px", fontWeight: "600", cursor: "pointer",
+            fontFamily: "inherit", transition: "background 0.2s",
+          }}
+          className="fd-view-btn"
+        >
           View Profile
         </button>
       )}
@@ -133,18 +143,53 @@ const FollowDashboard = () => {
 
   return (
     <Layout>
-      <div className="dashboard-container">
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }} className="dashboard-content">
-          <div className="search-wrapper">
-            <div ref={dropdownRef} className="search-container">
-              <div className="glassmorph-search-container">
-                <span className="search-icon" role="img" aria-label="search">🔍</span>
+      <style>{`
+        .fd-user-card:hover { border-color: rgba(99,102,241,0.3) !important; box-shadow: 0 8px 24px rgba(99,102,241,0.08) !important; }
+        .fd-view-btn:hover { background: rgba(99,102,241,0.2) !important; }
+        .fd-search-input:focus { border-color: rgba(99,102,241,0.5) !important; box-shadow: 0 0 0 3px rgba(99,102,241,0.1) !important; }
+        .fd-search-wrap.focused { border-color: rgba(99,102,241,0.5) !important; box-shadow: 0 0 0 3px rgba(99,102,241,0.1) !important; }
+        .fd-follow-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        .fd-unfollow-btn:hover { background: rgba(239,68,68,0.15) !important; border-color: rgba(239,68,68,0.4) !important; }
+      `}</style>
+
+      <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "40px 24px 80px" }}>
+        {/* Page Header */}
+        <div style={{ textAlign: "center", marginBottom: "40px" }}>
+          <div style={{
+            display: "inline-flex", alignItems: "center", gap: "6px", padding: "5px 12px",
+            background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.18)",
+            borderRadius: "100px", fontSize: "11px", fontWeight: "700", color: "#a5b4fc",
+            textTransform: "uppercase", letterSpacing: "1px", marginBottom: "12px",
+          }}>
+            ✦ Community
+          </div>
+          <h1 style={{ fontSize: "32px", fontWeight: "800", letterSpacing: "-0.8px", color: "#fafafa", margin: "0 0 8px" }}>
+            Connect with Developers
+          </h1>
+          <p style={{ fontSize: "15px", color: "#a1a1aa", margin: 0 }}>Search and follow amazing people in the community</p>
+        </div>
+
+        {/* Search */}
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: "24px" }}>
+            <div ref={dropdownRef} style={{ width: "100%", maxWidth: "480px", position: "relative" }}>
+              <div
+                className="fd-search-wrap"
+                style={{
+                  position: "relative", display: "flex", alignItems: "center",
+                  background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)",
+                  borderRadius: "12px", transition: "border-color 0.2s, box-shadow 0.2s",
+                  minHeight: "52px",
+                }}
+              >
+                <span style={{ position: "absolute", left: "14px", fontSize: "16px", pointerEvents: "none", color: "#52525b" }}>🔍</span>
                 <input
                   type="text"
                   id="follow-search-input"
-                  className={`glassmorph-search-input${followedName ? " has-value" : ""}`}
+                  className="fd-search-input"
                   value={followedName}
                   autoComplete="off"
+                  placeholder="Find people to connect with..."
                   onChange={(e) => {
                     const value = e.target.value;
                     setFollowedName(value);
@@ -152,140 +197,109 @@ const FollowDashboard = () => {
                     if (value.trim() !== "") debouncedSearchUsers(value);
                     else setSearchResults([]);
                   }}
-                  onFocus={e => e.target.parentNode.classList.add("focused")}
-                  onBlur={e => e.target.parentNode.classList.remove("focused")}
+                  style={{
+                    width: "100%", padding: "14px 14px 14px 42px",
+                    border: "none", outline: "none", background: "transparent",
+                    color: "#fafafa", fontSize: "15px", borderRadius: "12px", fontFamily: "inherit",
+                  }}
                 />
-                <label htmlFor="follow-search-input" className={`floating-label${followedName ? " floated" : ""}`}>
-                  Find people to connect with
-                </label>
               </div>
             </div>
           </div>
-          
-          <div className="search-results-container">
-            <AnimatePresence>
-              {(searchResults && searchResults.length > 0) && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.2 }}
-                  className="search-results-grid"
-                >
-                  {searchResults.map((user, idx) => renderUserCard(user, true))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-          
-          <div className="recommendations-section">
-            <h3 className="section-title">Connect with Amazing People!</h3>
-            <div className="users-grid">
+
+          {/* Search Results */}
+          <AnimatePresence>
+            {searchResults && searchResults.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.2 }}
+                style={{
+                  background: "rgba(17,17,24,0.98)", border: "1px solid rgba(255,255,255,0.1)",
+                  borderRadius: "14px", padding: "14px",
+                  display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))",
+                  gap: "10px", marginBottom: "24px",
+                  boxShadow: "0 16px 40px rgba(0,0,0,0.4)",
+                }}
+              >
+                {searchResults.map((user) => renderUserCard(user, true))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Recommendations */}
+          <div style={{
+            background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.07)",
+            borderRadius: "16px", padding: "24px",
+          }}>
+            <h3 style={{ fontSize: "16px", fontWeight: "700", color: "#fafafa", margin: "0 0 18px", textAlign: "center" }}>
+              Connect with Amazing People!
+            </h3>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: "14px" }}>
               {(!showProfile && !selectedUser ? sampleUsers : recentSearches).map(user => renderUserCard(user))}
             </div>
           </div>
-          
+
+          {/* Profile Card */}
           {showProfile && selectedUser && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
-              className="profile-card"
+              style={{
+                background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.07)",
+                borderRadius: "20px", padding: "32px", marginTop: "24px",
+                maxWidth: "700px", marginInline: "auto",
+              }}
             >
-              <div className="profile-header">
+              <div style={{ display: "flex", alignItems: "center", gap: "28px", flexWrap: "wrap" }}>
                 <img
                   src={profileimage || `https://api.dicebear.com/7.x/micah/svg?seed=${selectedUser.name}`}
                   alt="Profile"
-                  className="profile-avatar"
+                  style={{
+                    borderRadius: "50%", width: "110px", height: "110px", objectFit: "cover",
+                    border: "3px solid rgba(99,102,241,0.4)", boxShadow: "0 0 0 4px rgba(99,102,241,0.1)",
+                  }}
                 />
-                <div className="profile-info">
-                  <div className="profile-name-container">
-                    <h2 className="profile-name">{selectedUser.name}</h2>
-                    <span className="verified-badge">✔️</span>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px" }}>
+                    <h2 style={{ fontSize: "22px", fontWeight: "800", color: "#fafafa", margin: 0 }}>{selectedUser.name}</h2>
+                    <span style={{ color: "#6366f1", fontSize: "16px" }}>✔️</span>
                   </div>
-                  <div className="profile-actions">
+                  <div style={{ marginBottom: "14px" }}>
                     <button
                       onClick={isFollowing ? handleUnfollow : handleFollow}
-                      className={`follow-button ${isFollowing ? 'unfollow' : 'follow'}`}
+                      className={isFollowing ? "fd-unfollow-btn" : "fd-follow-btn"}
+                      style={{
+                        padding: "9px 22px", borderRadius: "8px", cursor: "pointer",
+                        fontWeight: "600", fontSize: "14px", fontFamily: "inherit",
+                        transition: "all 0.2s",
+                        ...(isFollowing ? {
+                          background: "transparent", border: "1px solid rgba(239,68,68,0.3)",
+                          color: "#f87171",
+                        } : {
+                          background: "linear-gradient(135deg, #6366f1, #8b5cf6)", border: "none",
+                          color: "#fff", boxShadow: "0 4px 16px rgba(99,102,241,0.3)",
+                        })
+                      }}
                     >
                       {isFollowing ? "Unfollow" : "Follow"}
                     </button>
                   </div>
-                  <div className="profile-stats">
-                    <span><strong>{followerCount}</strong> followers</span>
-                    <span><strong>{followingCount}</strong> following</span>
+                  <div style={{ display: "flex", gap: "24px", fontSize: "14px", color: "#a1a1aa" }}>
+                    <span><strong style={{ color: "#fafafa" }}>{followerCount}</strong> followers</span>
+                    <span><strong style={{ color: "#fafafa" }}>{followingCount}</strong> following</span>
                   </div>
+                  {message && (
+                    <p style={{ fontSize: "13px", color: "#10b981", marginTop: "10px", margin: "10px 0 0" }}>{message}</p>
+                  )}
                 </div>
               </div>
             </motion.div>
           )}
         </motion.div>
       </div>
-      
-      <style jsx>{`
-        .dashboard-container { padding: 0; box-sizing: border-box; overflow-x: hidden; }
-        .dashboard-content { padding: 2rem; background-color: #213448; color: #ECEFCA; min-height: 100vh; font-family: 'Segoe UI', Arial, sans-serif; }
-        
-        /* Search Styles */
-        .search-wrapper { display: flex; justify-content: center; margin-bottom: 1.5rem; position: relative; }
-        .search-container { margin-top: 30px; position: relative; width: 90%; max-width: 500px; }
-        .glassmorph-search-container { position: relative; width: 100%; display: flex; align-items: center; background: rgba(84, 119, 146, 0.25); border-radius: 12px; box-shadow: 0 4px 20px 0 rgba(31, 38, 135, 0.15); backdrop-filter: blur(13px); -webkit-backdrop-filter: blur(13px); border: 1.5px solid rgba(148, 180, 193, 0.44); margin-bottom: 0.5rem; min-height: 56px; transition: all 0.3s ease; }
-        .glassmorph-search-container.focused { border-color: #ECEFCA; box-shadow: 0 4px 25px 0 rgba(31, 38, 135, 0.25); }
-        .glassmorph-search-input { width: 100%; padding: 1.1rem 2.5rem 0.6rem 2.5rem; border: none; outline: none; background: transparent; color: #ECEFCA; font-size: 1.07rem; border-radius: 12px; z-index: 2; transition: background 0.3s; }
-        .glassmorph-search-input:focus { background: rgba(84, 119, 146, 0.32); }
-        .glassmorph-search-input::placeholder { color: transparent; }
-        .search-icon { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); font-size: 1.25rem; color: #94B4C1; pointer-events: none; z-index: 3; transition: color 0.25s; }
-        .glassmorph-search-container.focused .search-icon { color: #ECEFCA; }
-        .floating-label { position: absolute; left: 2.5rem; top: 50%; transform: translateY(-50%); font-size: 1.07rem; color: #ECEFCA; pointer-events: none; background: transparent; transition: all 0.21s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s; z-index: 4; padding: 0 2px; opacity: 0.92; }
-        .glassmorph-search-input:focus ~ .floating-label, .glassmorph-search-input.has-value ~ .floating-label, .floating-label.floated { top: 0.34rem; left: 2.3rem; font-size: 0.83rem; color: #94B4C1; opacity: 0.97; background: rgba(33,52,72,0.79); border-radius: 3px; padding: 0 5px; transform: none; }
-        
-        /* Search Results */
-        .search-results-container { width: 90%; max-width: 1200px; margin: 0 auto 1.5rem auto; position: relative; }
-        .search-results-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem; background-color: #547792; border: 1px solid #94B4C1; border-radius: 8px; width: 100%; z-index: 1000; color: #ECEFCA; padding: 1rem 0.8rem; margin-top: 0.2rem; box-sizing: border-box; box-shadow: 0 6px 15px rgba(0,0,0,0.15); }
-        
-        /* Recommendations Section */
-        .recommendations-section { max-width: 1100px; margin: 2.5rem auto 0 auto; padding: 2rem 1rem; background: rgba(33,52,72,0.6); border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
-        .section-title { margin-bottom: 1.5rem; color: #94B4C1; text-align: center; letter-spacing: 0.03em; font-weight: 500; font-size: 1.4rem; }
-        .users-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.2rem; justify-content: center; }
-        
-        /* User Cards */
-        .user-card { background-color: #547792; border-radius: 10px; padding: 1.2rem; color: #ECEFCA; text-align: center; border: 1px solid #94B4C1; transition: all 0.3s ease; cursor: pointer; display: flex; flex-direction: column; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .user-card:hover { background-color: #94B4C1; color: #213448; transform: translateY(-3px); box-shadow: 0 6px 12px rgba(0,0,0,0.15); }
-        .search-result-card { padding: 0.8rem; min-width: 120px; background-color: #213448; border: 1px solid #94B4C1; }
-        .search-result-card:hover { background-color: #2a4a6a; }
-        .user-avatar { width: 65px; height: 65px; border-radius: 50%; margin-bottom: 0.8rem; object-fit: cover; border: 2px solid #94B4C1; }
-        .search-result-card .user-avatar { width: 48px; height: 48px; }
-        .user-name { font-weight: 600; margin-bottom: 0.8rem; font-size: 1.1rem; }
-        .search-result-card .user-name { font-size: 0.9rem; margin-bottom: 0.3rem; }
-        .view-profile-btn { padding: 0.4rem 1rem; background-color: rgba(33,52,72,0.7); color: #ECEFCA; border: 1px solid #94B4C1; border-radius: 5px; cursor: pointer; font-size: 0.9rem; transition: all 0.3s ease; margin-top: 0.5rem; width: 100%; }
-        .view-profile-btn:hover { background-color: #213448; color: #ECEFCA; }
-        
-        /* Profile Card */
-        .profile-card { background-color: #547792; border: 1px solid #94B4C1; border-radius: 12px; padding: 2rem; margin-top: 3rem; max-width: 900px; margin-inline: auto; color: #ECEFCA; box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
-        .profile-header { display: flex; align-items: center; gap: 2.5rem; }
-        .profile-avatar { border-radius: 50%; width: 160px; height: 160px; object-fit: cover; border: 3px solid #94B4C1; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
-        .profile-info { flex: 1; }
-        .profile-name-container { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.2rem; }
-        .profile-name { font-weight: 500; font-size: 1.8rem; margin: 0; }
-        .verified-badge { color: #94B4C1; font-size: 1.2rem; }
-        .profile-actions { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
-        .follow-button { background-color: #213448; color: #ECEFCA; border: 1px solid #94B4C1; border-radius: 6px; padding: 0.6rem 1.6rem; cursor: pointer; font-size: 1rem; font-weight: 500; transition: all 0.3s ease; }
-        .follow-button:hover { background-color: #94B4C1; color: #213448; transform: translateY(-2px); }
-        .profile-stats { display: flex; gap: 2rem; color: #ECEFCA; font-size: 1.05rem; }
-        
-        @media (max-width: 768px) {
-          .profile-header { flex-direction: column; text-align: center; gap: 1rem; }
-          .profile-avatar { width: 120px; height: 120px; }
-          .profile-actions, .profile-stats { justify-content: center; }
-          .users-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
-        }
-        
-        @media (max-width: 600px) {
-          .glassmorph-search-container { flex-direction: column; align-items: stretch; }
-          .search-icon { margin-bottom: 0.5rem; }
-          .users-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
-        }
-      `}</style>
     </Layout>
   );
 };

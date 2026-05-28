@@ -14,17 +14,15 @@ const { getIO, userSocketMap } = require("../Sockets/socket");
 const sendEmail = require("../middleware/emailverify");  // Correct relative path // Make sure to implement this utility
 require("dotenv").config();
 
-if (!admin.apps.length) {
-  let serviceAccount;
+if (!admin.apps.length && process.env.FIREBASE_ADMIN_CREDENTIALS) {
   try {
-    serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN_CREDENTIALS);
+    const serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN_CREDENTIALS);
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+    });
   } catch (e) {
-    console.error("Failed to parse FIREBASE_ADMIN_CREDENTIALS. Make sure it is a valid JSON string.");
-    throw e;
+    console.error("Failed to parse FIREBASE_ADMIN_CREDENTIALS. Google auth on the server may not work.");
   }
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-  });
 }
 
 const registerUser = async (req, res) => {

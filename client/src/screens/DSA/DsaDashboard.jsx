@@ -1,58 +1,55 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import * as XLSX from "xlsx";
 import { useNavigate } from "react-router-dom";
 import quoteList from "../../utils/quotes.js";
 import { handleLogout } from "../../utils/Logout.js";
 import Layout from "../../Layout1/Layout.jsx";
 import Navbar from "../../Layout1/Navbar.jsx";
-import socket from "../../sockets/socket.js";
 
 const Dashboard = () => {
   const [topic, setTopic] = useState("");
   const [filteredData, setFilteredData] = useState([]);
   const [questions, setQuestions] = useState([]);
   const [sortedQuestions, setSortedQuestions] = useState([]);
-  const [titles, setTitles] = useState([]);
   const [topics, setTopics] = useState([]);
   const [quote, setQuote] = useState("");
   const [showmenu, setshowmenu] = useState(false);
-  const [joinRoomId, setJoinRoomId] = useState("");
   const [showTopics, setShowTopics] = useState(false);
   const dropdownRef = useRef(null);
   const buttonRef = useRef(null);
   const navigate = useNavigate();
-  
+
   const handleSortByClick = () => setShowTopics(!showTopics);
-  
+
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target) && 
-          buttonRef.current && !buttonRef.current.contains(event.target)) {
-        setShowTopics(false);
-      }
+      if (
+        dropdownRef.current && !dropdownRef.current.contains(event.target) &&
+        buttonRef.current  && !buttonRef.current.contains(event.target)
+      ) setShowTopics(false);
     };
     document.addEventListener("click", handleClickOutside);
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
-  
+
   useEffect(() => setQuote(quoteList[Math.floor(Math.random() * quoteList.length)]), []);
-  
+
   useEffect(() => {
-    const fetchQuestionsFromBackend = async () => {
+    const fetchQuestions = async () => {
       try {
-        const response = await axios.get(process.env.REACT_APP_GET_ALL_QUESTIONS, { withCredentials: true });
-        const questionList = response.data.questions;
+        const res = await axios.get(process.env.REACT_APP_GET_ALL_QUESTIONS, { withCredentials: true });
+        const list = Array.isArray(res.data?.questions) ? res.data.questions : [];
+        if (!list.length) return;
 
-        const dashboardInfo = await axios.get(process.env.REACT_APP_FETCH_DASHBOARD, { withCredentials: true });
-        const { importantQuestions, revisionQuestions } = dashboardInfo.data;
+        const dash = await axios.get(process.env.REACT_APP_FETCH_DASHBOARD, { withCredentials: true });
+        const { importantQuestions = [], revisionQuestions = [] } = dash.data || {};
 
-        const cleanedData = questionList.map((q) => ({
+        const cleaned = list.map((q) => ({
           Topic: q.topic || "Miscellaneous",
           Title: q.title,
           Difficulty: q.difficulty,
-          Revision: revisionQuestions.some((rq) => rq.questionId === q.title) ? "Yes" : "No",
-          Important: importantQuestions.some((iq) => iq.questionId === q.title) ? "Yes" : "No",
+          Revision: revisionQuestions.some((r) => r.questionId === q.title) ? "Yes" : "No",
+          Important: importantQuestions.some((r) => r.questionId === q.title) ? "Yes" : "No",
           Link: q.link,
           "Problem Statement": q.problemStatement,
           "Sample Input": q.sampleInput,
@@ -60,46 +57,31 @@ const Dashboard = () => {
           Constraints: q.constraints,
         }));
 
-        const sortedData = cleanedData.sort((a, b) => a.Difficulty.localeCompare(b.Difficulty));
-        setQuestions(sortedData);
-        setSortedQuestions(sortedData);
-        setFilteredData(sortedData);
-        setTitles(sortedData.map((q) => q.Title));
-        setTopics(Array.from(new Set(sortedData.map((q) => q.Topic))));
-      } catch (error) {
-        console.error("Error fetching questions from backend:", error);
-      }
+        const sorted = cleaned.sort((a, b) => a.Difficulty.localeCompare(b.Difficulty));
+        setQuestions(sorted); setSortedQuestions(sorted); setFilteredData(sorted);
+        setTopics(Array.from(new Set(sorted.map((q) => q.Topic))));
+      } catch (e) { console.error("Error fetching questions:", e); }
     };
-    fetchQuestionsFromBackend();
+    fetchQuestions();
   }, []);
-  
+
   const handleCreateRoom = async (question, customState = {}) => {
     const roomId = slugify(question.Title);
     const roomData = {
-      roomId,
-      title: question.Title,
-      statement: question["Problem Statement"],
-      difficulty: question.Difficulty,
-      sampleInput: question["Sample Input"],
-      sampleOutput: question["Sample Output"],
-      constraints: question.Constraints,
+      roomId, title: question.Title, statement: question["Problem Statement"],
+      difficulty: question.Difficulty, sampleInput: question["Sample Input"],
+      sampleOutput: question["Sample Output"], constraints: question.Constraints,
     };
-
     try {
       const token = localStorage.getItem("authToken");
-      const response = await axios.get(process.env.REACT_APP_ROOM_CREATE, {
+      const res = await axios.get(process.env.REACT_APP_ROOM_CREATE, {
         withCredentials: true,
-        headers: {...(token && { Authorization: `Bearer ${token}` })},
+        headers: { ...(token && { Authorization: `Bearer ${token}` }) },
       });
-      const privateRoomId = response.data.roomId;
-      navigate(`/customroom/${roomId}/${privateRoomId}`, {
-        state: { question: roomData, ...customState },
-      });
-    } catch (error) {
-      console.error("❌ Failed to create private room:", error);
-    }
+      navigate(`/customroom/${roomId}/${res.data.roomId}`, { state: { question: roomData, ...customState } });
+    } catch (e) { console.error("Failed to create room:", e); }
   };
-  
+
   const handleJoinRoom = async (question) => {
     const privateRoomId = prompt(`Enter private room ID for "${question.Title}"`);
     if (!privateRoomId) return;
@@ -107,286 +89,299 @@ const Dashboard = () => {
       await axios.post(process.env.REACT_APP_ROOM_JOIN, { roomId: privateRoomId }, { withCredentials: true });
       const publicRoomId = slugify(question.Title);
       navigate(`/customroom/${publicRoomId}/${privateRoomId}`, {
-        state: {
-          question: {
-            title: question.Title,
-            statement: question["Problem Statement"],
-            difficulty: question.Difficulty,
-            sampleInput: question["Sample Input"],
-            sampleOutput: question["Sample Output"],
-            constraints: question.Constraints,
-          },
-        },
+        state: { question: { title: question.Title, statement: question["Problem Statement"], difficulty: question.Difficulty, sampleInput: question["Sample Input"], sampleOutput: question["Sample Output"], constraints: question.Constraints } },
       });
-    } catch (error) {
-      console.log("❌ Room join failed:", error?.response?.data?.message);
-    }
+    } catch (e) { console.log("Room join failed:", e?.response?.data?.message); }
   };
-  
+
   const handleUpdateQuestion = async (index, field, value) => {
-    const updatedQuestions = [...questions];
+    const updated = [...questions];
     const newValue = value === "Yes" ? "No" : "Yes";
     try {
-      const response = await axios.post(
-        process.env.REACT_APP_UPDATE_QUESTION_URI,
-        {
-          title: updatedQuestions[index].Topic,
-          questionId: updatedQuestions[index].Title,
-          field,
-          value: newValue,
-        },
-        { withCredentials: true }
-      );
-      updatedQuestions[index][field] = newValue;
-      setQuestions(updatedQuestions);
-      setSortedQuestions(updatedQuestions);
-      setFilteredData(updatedQuestions);
-    } catch (error) {
-      console.error(error);
-    }
+      await axios.post(process.env.REACT_APP_UPDATE_QUESTION_URI, {
+        title: updated[index].Topic, questionId: updated[index].Title, field, value: newValue,
+      }, { withCredentials: true });
+      updated[index][field] = newValue;
+      setQuestions(updated); setSortedQuestions(updated); setFilteredData(updated);
+    } catch (e) { console.error(e); }
   };
-  
-  const fetchResponse = async () => {
-    try {
-      const response = await axios.get(process.env.REACT_APP_FETCH_DASHBOARD, { withCredentials: true });
-      const { importantQuestions, revisionQuestions } = response.data;
 
-      const updatedData = questions.map((q) => ({
-        ...q,
-        Important: importantQuestions.some((iq) => iq.questionId === q.Title) ? "Yes" : "No",
-        Revision: revisionQuestions.some((rq) => rq.questionId === q.Title) ? "Yes" : "No",
-        Topic: q.Topic || "Miscellaneous",
-      }));
-
-      setQuestions(updatedData);
-      setSortedQuestions(updatedData);
-      setFilteredData(updatedData);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-  
   const handleLogoutClick = () => { setshowmenu(false); handleLogout(navigate); };
   const handleToggleMenu = () => setshowmenu(!showmenu);
   const handleNavigateToDashboard = () => navigate("/dsadashboard");
-  const slugify = (str) => str.toLowerCase().trim().replace(/[^\w\s-]/g, "").replace(/[\s_-]+/g, "-").replace(/^-+|-+$/g, "");
+  const slugify = (s) => s.toLowerCase().trim().replace(/[^\w\s-]/g, "").replace(/[\s_-]+/g, "-").replace(/^-+|-+$/g, "");
   const handleJoinQuestionRoom = (title) => navigate(`/questionroom/${slugify(title)}`);
-  const handleSolvequestion = (question) => handleCreateRoom(question, { hideRoomId: true, hideVideoTitle: true });
-  
-  const handleTopicClick = (selectedTopic) => {
-    if (topic === selectedTopic) {
-      setTopic(""); 
-      setFilteredData(sortedQuestions);
-    } else {
-      setTopic(selectedTopic);
-      setFilteredData(sortedQuestions.filter((item) => item.Topic === selectedTopic));
-    }
+  const handleSolveQuestion = (q) => handleCreateRoom(q, { hideRoomId: true, hideVideoTitle: true });
+
+  const handleTopicClick = (sel) => {
+    if (topic === sel) { setTopic(""); setFilteredData(sortedQuestions); }
+    else { setTopic(sel); setFilteredData(sortedQuestions.filter((q) => q.Topic === sel)); }
     setShowTopics(false);
   };
-  
-  // Styles
-  const styles = {
-    pageHeading: {
-      textAlign: "center", fontSize: "2.5rem", color: "#213448", 
-      margin: "100px auto 30px", fontWeight: "700", maxWidth: "900px",
-      lineHeight: "1.3", textShadow: "0 1px 2px rgba(0,0,0,0.05)"
-    },
-    dropdownButton: {
-      backgroundColor: showTopics ? "#94B4C1" : "#213448", border: "none",
-      borderRadius: "5px", padding: "10px 15px", cursor: "pointer",
-      fontSize: "14px", fontWeight: "600", color: "#fff", marginLeft: "0px",
-      boxShadow: "0 2px 10px rgba(33,52,72,0.2)", transition: "all 0.3s",
-      display: "flex", alignItems: "center", gap: "6px"
-    },
-    dropdownContainer: {
-      position: "relative", marginBottom: "30px", marginLeft: "40px"
-    },
-    dropdownMenu: {
-      position: "absolute", top: "calc(100% + 8px)", left: 0, zIndex: 100,
-      background: "#fff", border: "1px solid #94B4C1", borderRadius: "8px",
-      boxShadow: "0 4px 20px rgba(33,52,72,0.2)", minWidth: "220px",
-      padding: "8px 0", textAlign: "left"
-    },
-    dropdownItem: (isActive) => ({
-      padding: "10px 16px", cursor: "pointer", fontWeight: isActive ? "600" : "400",
-      color: "#213448", transition: "background 0.2s, color 0.2s", borderRadius: "4px",
-      margin: "4px 8px", backgroundColor: isActive ? "#ECEFCA" : "transparent"
-    }),
-    tableContainer: {
-      background: "#fff", padding: "25px", borderRadius: "12px",
-      boxShadow: "0 8px 30px rgba(0, 0, 0, 0.08)", border: "1px solid #ECEFCA",
-      margin: "20px auto", maxWidth: "1300px"
-    },
-    tableHeader: {
-      textAlign: "left", color: "#213448", fontSize: "1.5rem", 
-      marginBottom: "20px", fontWeight: "700", display: "flex", 
-      justifyContent: "space-between", alignItems: "center"
-    },
-    tableHeadCell: {
-      padding: "14px 16px", color: "#fff", fontWeight: "600", 
-      background: "#213448", textAlign: "left", whiteSpace: "nowrap"
-    },
-    tableRow: (index) => ({
-      backgroundColor: index % 2 === 0 ? "#fff" : "#f8f9fa",
-      borderBottom: "1px solid #ECEFCA", transition: "all 0.2s"
-    }),
-    tableCell: {
-      padding: "12px 16px", color: "#213448", textAlign: "left"
-    },
-    checkbox: {
-      width: "18px", height: "18px", accentColor: "#547792", cursor: "pointer"
-    },
-    button: {
-      backgroundColor: "#547792", padding: "8px 12px", color: "#fff",
-      border: "none", borderRadius: "6px", fontWeight: "600", cursor: "pointer",
-      transition: "all 0.3s ease", boxShadow: "0 2px 6px rgba(84, 119, 146, 0.2)",
-      fontSize: "13px", whiteSpace: "nowrap", textAlign: "center"
-    },
-    difficulty: (level) => {
-      const colors = {
-        Easy: "#4caf50",
-        Medium: "#ff9800",
-        Hard: "#f44336"
-      };
-      return {
-        display: "inline-block", padding: "4px 12px",
-        borderRadius: "50px", backgroundColor: colors[level] || "#94B4C1",
-        color: "#fff", fontWeight: "600", fontSize: "12px"
-      };
-    }
+
+  const diffBadgeStyle = (level) => {
+    const map = {
+      Easy:   { background: "rgba(16,185,129,0.15)",  color: "#6ee7b7", border: "1px solid rgba(16,185,129,0.25)" },
+      Medium: { background: "rgba(245,158,11,0.15)",  color: "#fcd34d", border: "1px solid rgba(245,158,11,0.25)" },
+      Hard:   { background: "rgba(239,68,68,0.15)",   color: "#fca5a5", border: "1px solid rgba(239,68,68,0.25)" },
+    };
+    return {
+      display: "inline-flex", alignItems: "center", padding: "3px 10px",
+      borderRadius: "100px", fontSize: "12px", fontWeight: "600", whiteSpace: "nowrap",
+      ...(map[level] || map["Medium"]),
+    };
   };
 
+  const displayData = topic ? filteredData : sortedQuestions;
+
   return (
-    <Layout style={{ background: "#f5f7fa" }}>
+    <Layout>
+      <style>{`
+        .dsa-row:hover { background: rgba(99,102,241,0.05) !important; }
+        .dsa-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(99,102,241,0.4) !important; }
+        .dsa-btn-ghost:hover { background: rgba(255,255,255,0.08) !important; color: #fafafa !important; }
+        .dsa-topic-item:hover { background: rgba(255,255,255,0.06) !important; color: #fafafa !important; }
+        .dsa-filter-btn:hover { background: rgba(99,102,241,0.18) !important; border-color: rgba(99,102,241,0.4) !important; }
+        input[type="checkbox"].dsa-check { accent-color: #6366f1; }
+      `}</style>
+
       <Navbar showMenu={showmenu} onToggleMenu={handleToggleMenu} onLogout={handleLogoutClick} onDashboard={handleNavigateToDashboard} />
-      
-      <div className="dashboard-content" style={{ paddingTop: "20px" }}>
+
+      <div style={{ padding: "28px 28px 80px", maxWidth: "1360px", margin: "0 auto" }}>
+
         {/* Quote */}
-        <h1 style={styles.pageHeading}>{quote}</h1>
-        
-        {/* Topic Filter */}
-        <div style={styles.dropdownContainer}>
-          <button ref={buttonRef} onClick={handleSortByClick} style={styles.dropdownButton}>
-            {topic ? `Topic: ${topic}` : "Filter by Topic"}
-            <svg width="12" height="8" viewBox="0 0 12 8" fill="none" style={{ marginLeft: "4px" }}>
-              <path d="M1 1L6 6L11 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-            </svg>
-          </button>
-          
-          {showTopics && (
-            <div ref={dropdownRef} style={styles.dropdownMenu}>
-              {topics.map((topicItem) => (
-                <div 
-                  key={topicItem} 
-                  onClick={() => handleTopicClick(topicItem)}
-                  style={styles.dropdownItem(topic === topicItem)}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#ECEFCA"}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = topic === topicItem ? "#ECEFCA" : "transparent"}
-                >
-                  {topicItem}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-        
-        {/* Questions Table */}
-        <div style={styles.tableContainer}>
-          <div style={styles.tableHeader}>
-            <span>DSA Questions {topic && `- ${topic}`}</span>
-            <span style={{ fontSize: "14px", color: "#547792", fontWeight: "normal" }}>
-              {(topic ? filteredData : sortedQuestions).length} questions
-            </span>
+        {quote && (
+          <div style={{ textAlign: "center", marginBottom: "40px" }}>
+            <p style={{
+              fontSize: "16px", color: "#a1a1aa", fontStyle: "italic", lineHeight: "1.75",
+              maxWidth: "700px", margin: "0 auto",
+              padding: "20px 28px",
+              background: "rgba(255,255,255,0.02)",
+              border: "1px solid rgba(255,255,255,0.07)",
+              borderRadius: "12px",
+            }}>
+              "{quote}"
+            </p>
           </div>
-          
-          <div style={{ overflowX: "auto", borderRadius: "8px", border: "1px solid #ECEFCA" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", minWidth: "900px" }}>
+        )}
+
+        {/* Page header */}
+        <div style={{ marginBottom: "28px" }}>
+          <div style={{
+            display: "inline-flex", alignItems: "center", gap: "6px", padding: "5px 12px",
+            background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.18)",
+            borderRadius: "100px", fontSize: "11px", fontWeight: "700", color: "#a5b4fc",
+            textTransform: "uppercase", letterSpacing: "1px", marginBottom: "14px",
+          }}>✦ Practice</div>
+          <h1 style={{
+            fontSize: "36px", fontWeight: "800", letterSpacing: "-1.2px",
+            color: "#fafafa", margin: "0 0 8px", lineHeight: "1.1",
+          }}>
+            DSA Question Bank
+          </h1>
+          <p style={{ fontSize: "15px", color: "#a1a1aa", margin: 0 }}>
+            Practice data structures and algorithms with real-time collaborative rooms.
+          </p>
+        </div>
+
+        {/* Controls row */}
+        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "24px", flexWrap: "wrap" }}>
+          {/* Filter button */}
+          <div style={{ position: "relative" }}>
+            <button
+              ref={buttonRef}
+              onClick={handleSortByClick}
+              className="dsa-filter-btn"
+              style={{
+                display: "flex", alignItems: "center", gap: "7px",
+                padding: "9px 16px",
+                background: topic ? "rgba(99,102,241,0.12)" : "rgba(255,255,255,0.04)",
+                border: `1px solid ${topic ? "rgba(99,102,241,0.3)" : "rgba(255,255,255,0.1)"}`,
+                borderRadius: "9px", color: topic ? "#a5b4fc" : "#a1a1aa",
+                fontSize: "14px", fontWeight: "600", cursor: "pointer",
+                transition: "all 0.2s", fontFamily: "inherit",
+              }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+              {topic ? `Topic: ${topic}` : "Filter by Topic"}
+              <svg width="12" height="8" viewBox="0 0 12 8" fill="none" style={{ marginLeft: "2px", transition: "transform 0.2s", transform: showTopics ? "rotate(180deg)" : "none" }}>
+                <path d="M1 1L6 6L11 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+            </button>
+
+            {showTopics && (
+              <div
+                ref={dropdownRef}
+                style={{
+                  position: "absolute", top: "calc(100% + 8px)", left: 0, zIndex: 100,
+                  background: "rgba(9,9,11,0.97)", backdropFilter: "blur(24px)",
+                  border: "1px solid rgba(255,255,255,0.09)", borderRadius: "12px",
+                  boxShadow: "0 16px 48px rgba(0,0,0,0.5)", minWidth: "220px", padding: "6px",
+                }}
+              >
+                {topics.map((t) => (
+                  <div
+                    key={t}
+                    className="dsa-topic-item"
+                    onClick={() => handleTopicClick(t)}
+                    style={{
+                      padding: "9px 12px", cursor: "pointer", borderRadius: "7px",
+                      color: topic === t ? "#a5b4fc" : "#a1a1aa",
+                      background: topic === t ? "rgba(99,102,241,0.1)" : "transparent",
+                      fontWeight: topic === t ? "600" : "400", fontSize: "14px",
+                      transition: "background 0.2s, color 0.2s",
+                    }}
+                  >
+                    {t}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Count badge */}
+          <span style={{
+            padding: "6px 14px", borderRadius: "100px",
+            background: "rgba(255,255,255,0.04)",
+            border: "1px solid rgba(255,255,255,0.08)",
+            fontSize: "13px", color: "#52525b", fontWeight: "500",
+          }}>
+            {displayData.length} questions{topic && ` · ${topic}`}
+          </span>
+        </div>
+
+        {/* Table */}
+        <div style={{
+          background: "rgba(255,255,255,0.025)",
+          border: "1px solid rgba(255,255,255,0.07)",
+          borderRadius: "16px", overflow: "hidden",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+        }}>
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", minWidth: "980px" }}>
               <thead>
-                <tr>
-                  <th style={{ ...styles.tableHeadCell, borderTopLeftRadius: "8px" }}>Topic</th>
-                  <th style={styles.tableHeadCell}>Title</th>
-                  <th style={styles.tableHeadCell}>Difficulty</th>
-                  <th style={styles.tableHeadCell}>Revision</th>
-                  <th style={styles.tableHeadCell}>Submitted</th>
-                  <th style={{ ...styles.tableHeadCell, width: "90px" }}>Solve</th>
-                  <th style={styles.tableHeadCell}>Join Room</th>
-                  <th style={styles.tableHeadCell}>Create Private</th>
-                  <th style={{ ...styles.tableHeadCell, borderTopRightRadius: "8px" }}>Join Private</th>
+                <tr style={{ background: "rgba(255,255,255,0.04)", borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+                  {["Topic", "Title", "Difficulty", "Revision", "Important", "Solve", "Join Room", "Create Room", "Join Private"].map((h, i) => (
+                    <th
+                      key={h}
+                      style={{
+                        padding: "14px 16px", textAlign: "left", fontSize: "11px",
+                        fontWeight: "700", color: "#52525b", textTransform: "uppercase",
+                        letterSpacing: "0.6px", whiteSpace: "nowrap",
+                        borderRight: i < 8 ? "1px solid rgba(255,255,255,0.04)" : "none",
+                      }}
+                    >
+                      {h}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
-                {(topic ? filteredData : sortedQuestions).map((q, index) => (
-                  <tr 
-                    key={index} 
-                    style={styles.tableRow(index)}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = "#f0f4f8";
-                      e.currentTarget.style.transform = "translateY(-1px)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = index % 2 === 0 ? "#fff" : "#f8f9fa";
-                      e.currentTarget.style.transform = "translateY(0px)";
+                {displayData.map((q, idx) => (
+                  <tr
+                    key={idx}
+                    className="dsa-row"
+                    style={{
+                      borderBottom: "1px solid rgba(255,255,255,0.04)",
+                      transition: "background 0.15s",
                     }}
                   >
-                    <td style={styles.tableCell}>{q.Topic || "N/A"}</td>
-                    <td style={styles.tableCell}><strong>{q.Title}</strong></td>
-                    <td style={styles.tableCell}>
-                      <div style={styles.difficulty(q.Difficulty)}>{q.Difficulty}</div>
+                    <td style={{ padding: "13px 16px", fontSize: "13px", color: "#a1a1aa", whiteSpace: "nowrap" }}>
+                      {q.Topic || "—"}
                     </td>
-                    <td style={styles.tableCell}>
-                      <input 
-                        type="checkbox" 
-                        checked={q.Revision === "Yes"} 
-                        onChange={() => handleUpdateQuestion(index, "Revision", q.Revision)}
-                        style={styles.checkbox}
+                    <td style={{ padding: "13px 16px", fontSize: "14px", fontWeight: "600", color: "#fafafa" }}>
+                      {q.Title}
+                    </td>
+                    <td style={{ padding: "13px 16px" }}>
+                      <span style={diffBadgeStyle(q.Difficulty)}>{q.Difficulty}</span>
+                    </td>
+                    <td style={{ padding: "13px 16px" }}>
+                      <input
+                        type="checkbox"
+                        className="dsa-check"
+                        checked={q.Revision === "Yes"}
+                        onChange={() => handleUpdateQuestion(idx, "Revision", q.Revision)}
+                        style={{ width: "17px", height: "17px", cursor: "pointer" }}
                       />
                     </td>
-                    <td style={styles.tableCell}>
-                      <input 
-                        type="checkbox" 
-                        checked={q.Important === "Yes"} 
-                        onChange={() => handleUpdateQuestion(index, "Important", q.Important)}
-                        style={styles.checkbox}
+                    <td style={{ padding: "13px 16px" }}>
+                      <input
+                        type="checkbox"
+                        className="dsa-check"
+                        checked={q.Important === "Yes"}
+                        onChange={() => handleUpdateQuestion(idx, "Important", q.Important)}
+                        style={{ width: "17px", height: "17px", cursor: "pointer" }}
                       />
                     </td>
-                    <td style={styles.tableCell}>
-                      <button 
-                        style={{ ...styles.button, backgroundColor: "#213448" }}
-                        onClick={() => handleSolvequestion(q)}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#2d4560"}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#213448"}
+                    <td style={{ padding: "13px 16px" }}>
+                      <button
+                        className="dsa-btn"
+                        onClick={() => handleSolveQuestion(q)}
+                        style={{
+                          padding: "7px 13px",
+                          background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+                          color: "white", border: "none", borderRadius: "7px",
+                          fontSize: "12px", fontWeight: "600", cursor: "pointer",
+                          boxShadow: "0 2px 10px rgba(99,102,241,0.3)",
+                          transition: "all 0.2s", fontFamily: "inherit", whiteSpace: "nowrap",
+                        }}
                       >
-                        Submit
+                        Solve
                       </button>
                     </td>
-                    <td style={styles.tableCell}>
-                      <button 
-                        style={styles.button}
+                    <td style={{ padding: "13px 16px" }}>
+                      <button
+                        className="dsa-btn"
                         onClick={() => handleJoinQuestionRoom(q.Title)}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#6089a6"}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#547792"}
+                        style={{
+                          padding: "7px 13px",
+                          background: "rgba(6,182,212,0.12)",
+                          color: "#67e8f9",
+                          border: "1px solid rgba(6,182,212,0.25)",
+                          borderRadius: "7px", fontSize: "12px", fontWeight: "600",
+                          cursor: "pointer", transition: "all 0.2s",
+                          fontFamily: "inherit", whiteSpace: "nowrap",
+                        }}
+                        onMouseOver={(e) => { e.currentTarget.style.background = "rgba(6,182,212,0.2)"; e.currentTarget.style.transform = "translateY(-1px)"; }}
+                        onMouseOut={(e) => { e.currentTarget.style.background = "rgba(6,182,212,0.12)"; e.currentTarget.style.transform = "none"; }}
                       >
                         Join Room
                       </button>
                     </td>
-                    <td style={styles.tableCell}>
-                      <button 
-                        style={{ ...styles.button, backgroundColor: "#94B4C1" }}
+                    <td style={{ padding: "13px 16px" }}>
+                      <button
+                        className="dsa-btn"
                         onClick={() => handleCreateRoom(q)}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#a9c5d0"}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#94B4C1"}
+                        style={{
+                          padding: "7px 13px",
+                          background: "rgba(139,92,246,0.12)",
+                          color: "#c4b5fd",
+                          border: "1px solid rgba(139,92,246,0.25)",
+                          borderRadius: "7px", fontSize: "12px", fontWeight: "600",
+                          cursor: "pointer", transition: "all 0.2s",
+                          fontFamily: "inherit", whiteSpace: "nowrap",
+                        }}
+                        onMouseOver={(e) => { e.currentTarget.style.background = "rgba(139,92,246,0.2)"; e.currentTarget.style.transform = "translateY(-1px)"; }}
+                        onMouseOut={(e) => { e.currentTarget.style.background = "rgba(139,92,246,0.12)"; e.currentTarget.style.transform = "none"; }}
                       >
                         Create
                       </button>
                     </td>
-                    <td style={styles.tableCell}>
-                      <button 
-                        style={{ ...styles.button, backgroundColor: "#94B4C1" }}
+                    <td style={{ padding: "13px 16px" }}>
+                      <button
+                        className="dsa-btn-ghost"
                         onClick={() => handleJoinRoom(q)}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#a9c5d0"}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#94B4C1"}
+                        style={{
+                          padding: "7px 13px",
+                          background: "rgba(255,255,255,0.04)",
+                          color: "#a1a1aa",
+                          border: "1px solid rgba(255,255,255,0.1)",
+                          borderRadius: "7px", fontSize: "12px", fontWeight: "600",
+                          cursor: "pointer", transition: "all 0.2s",
+                          fontFamily: "inherit", whiteSpace: "nowrap",
+                        }}
                       >
-                        Join
+                        Join Private
                       </button>
                     </td>
                   </tr>

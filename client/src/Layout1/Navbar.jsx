@@ -1,42 +1,123 @@
 import React, { useEffect, useState } from "react";
-import { Navigate, useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { handleLogout } from "../utils/Logout.js";
 import { createroom, joinroom } from "../Rooms/room.jsx";
-import { io } from "socket.io-client";
 import axios from "axios";
-import solvedproblemslist from "../screens/solvedproblemslist/solvedproblemslist";
-const socket = io(process.env.REACT_APP_SOCKET_URL);
 
-// Enhanced styles with animations
-const styles = {
-  nav: { position: "fixed", top: 0, left: 0, width: "100%", height: "70px", backgroundColor: "#213448", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0 20px", color: "#ECEFCA", zIndex: 10, boxShadow: "0 3px 10px rgba(0,0,0,0.2)", backdropFilter: "blur(10px)" },
-  logo: { display: "flex", alignItems: "center", gap: "10px", cursor: "pointer", transition: "transform 0.3s ease" },
-  logoText: { fontSize: "1.8rem", fontWeight: "bold", color: "#ECEFCA", letterSpacing: "0.5px", transition: "color 0.3s ease" },
-  logoImg: { height: "40px", transition: "transform 0.3s ease" },
-  menuContainer: { display: "flex", alignItems: "center", gap: "20px" },
-  link: { color: "#ECEFCA", textDecoration: "none", fontSize: "15px", fontWeight: "500", padding: "5px 10px", borderRadius: "4px", transition: "all 0.3s ease" },
-  activeLink: { color: "#ECEFCA", textDecoration: "none", fontSize: "15px", fontWeight: "600", padding: "5px 10px", borderRadius: "4px", backgroundColor: "rgba(148, 180, 193, 0.15)", transition: "all 0.3s ease" },
-  dropdownContainer: { position: "relative", transition: "transform 0.2s ease" },
-  dropdownButton: { background: "none", border: "none", color: "#ECEFCA", fontSize: "15px", fontWeight: "500", cursor: "pointer", padding: "5px 10px", display: "flex", alignItems: "center", gap: "4px", borderRadius: "4px", transition: "all 0.3s ease" },
-  dropdownMenu: { position: "absolute", top: "calc(100% + 5px)", backgroundColor: "rgba(33, 52, 72, 0.95)", backdropFilter: "blur(10px)", borderRadius: "8px", padding: "6px", boxShadow: "0 5px 15px rgba(0,0,0,0.3)", zIndex: 20, minWidth: "180px", border: "1px solid rgba(148, 180, 193, 0.2)", animation: "fadeIn 0.3s ease-out forwards" },
-  dropdownItem: { display: "block", width: "100%", padding: "8px 12px", background: "none", color: "#ECEFCA", border: "none", textAlign: "left", cursor: "pointer", borderRadius: "4px", transition: "background 0.2s ease, transform 0.2s ease", fontSize: "14px" },
-  points: { color: "#ECEFCA", fontWeight: "600", padding: "6px 15px", backgroundColor: "rgba(148, 180, 193, 0.15)", borderRadius: "20px", fontSize: "14px", display: "flex", alignItems: "center", gap: "5px", transition: "transform 0.2s ease, background-color 0.3s ease",marginRight: "30px" },
-  profileButton: { background: "linear-gradient(135deg, #547792, #213448)", padding: "8px 16px", borderRadius: "20px", color: "#ECEFCA", border: "1px solid rgba(148, 180, 193, 0.3)", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px", fontSize: "14px", fontWeight: "500", transition: "all 0.3s ease", marginRight: "20px" },
-  roomButton: { padding: "8px 14px", color: "#ECEFCA", backgroundColor: "#547792", border: "none", borderRadius: "6px", fontWeight: "500", cursor: "pointer", boxShadow: "0 2px 8px rgba(84, 119, 146, 0.4)", transition: "all 0.3s ease", fontSize: "14px", display: "flex", alignItems: "center", gap: "5px" },
-  modalOverlay: { position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", background: "rgba(33, 52, 72, 0.8)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", animation: "fadeIn 0.3s ease-out forwards"  },
-  modalContent: { backgroundColor: "#213448", padding: "25px", borderRadius: "12px", display: "flex", flexDirection: "column", alignItems: "center", gap: "15px", border: "1px solid #547792", boxShadow: "0 4px 20px rgba(0, 0, 0, 0.5)", maxWidth: "300px", width: "90%", animation: "slideDown 0.3s ease-out forwards" },
-  modalInput: { backgroundColor: "rgba(84, 119, 146, 0.3)", color: "#ECEFCA", border: "1px solid rgba(148, 180, 193, 0.3)", borderRadius: "8px", padding: "12px", outline: "none", width: "100%", fontSize: "1rem", transition: "border-color 0.3s ease, box-shadow 0.3s ease" },
-  hamburgerButton: { background: "transparent", border: "none", color: "#ECEFCA", fontSize: "2rem", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", transition: "transform 0.3s ease",  marginRight: "25px" },
-  mobileMenu: { position: "absolute", top: "70px", right: "10px", backgroundColor: "#213448", borderRadius: "8px", padding: "10px", minWidth: "250px", boxShadow: "0 4px 20px rgba(0,0,0,0.5)", zIndex: 20, display: "flex", flexDirection: "column", gap: "5px", border: "1px solid rgba(148, 180, 193, 0.2)", animation: "slideDown 0.3s ease-out forwards" },
-  mobileMenuDivider: { height: "1px", backgroundColor: "rgba(148, 180, 193, 0.2)", margin: "5px 0" },
-  rightSection: { display: "flex", alignItems: "center", gap: "15px" },
-  '@keyframes fadeIn': { from: { opacity: 0 }, to: { opacity: 1 } },
-  '@keyframes slideDown': { from: { opacity: 0, transform: 'translateY(-20px)' }, to: { opacity: 1, transform: 'translateY(0)' } },
-  '@keyframes pulse': { '0%': { transform: 'scale(1)' }, '50%': { transform: 'scale(1.05)' }, '100%': { transform: 'scale(1)' } }
+const S = {
+  nav: {
+    position: "fixed", top: 0, left: 0, width: "100%", height: "68px",
+    backgroundColor: "rgba(9, 9, 11, 0.88)",
+    backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)",
+    display: "flex", justifyContent: "space-between", alignItems: "center",
+    padding: "0 24px", color: "#fafafa", zIndex: 1000,
+    borderBottom: "1px solid rgba(255,255,255,0.07)",
+    boxShadow: "0 4px 32px rgba(0,0,0,0.35)",
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif",
+  },
+  logo: {
+    display: "flex", alignItems: "center", gap: "10px",
+    cursor: "pointer", flexShrink: 0,
+  },
+  logoIcon: {
+    width: "34px", height: "34px",
+    background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+    borderRadius: "9px", display: "flex", alignItems: "center",
+    justifyContent: "center", fontSize: "15px", fontWeight: "800",
+    color: "white", letterSpacing: "-0.5px",
+    boxShadow: "0 2px 16px rgba(99,102,241,0.35)", flexShrink: 0,
+    transition: "transform 0.3s ease, box-shadow 0.3s ease",
+  },
+  logoText: {
+    fontSize: "18px", fontWeight: "700", color: "#fafafa", letterSpacing: "-0.4px",
+  },
+  menuContainer: { display: "flex", alignItems: "center", gap: "2px" },
+  link: {
+    color: "#a1a1aa", textDecoration: "none", fontSize: "14px", fontWeight: "500",
+    padding: "7px 13px", borderRadius: "7px", cursor: "pointer", border: "none",
+    background: "none", fontFamily: "inherit", transition: "color 0.2s, background 0.2s",
+    whiteSpace: "nowrap",
+  },
+  activeLink: {
+    color: "#fafafa", textDecoration: "none", fontSize: "14px", fontWeight: "500",
+    padding: "7px 13px", borderRadius: "7px", cursor: "pointer", border: "none",
+    background: "rgba(255,255,255,0.08)", fontFamily: "inherit",
+    transition: "color 0.2s, background 0.2s", whiteSpace: "nowrap",
+  },
+  dropdownContainer: { position: "relative" },
+  dropdownButton: {
+    background: "none", border: "none", color: "#a1a1aa", fontSize: "14px",
+    fontWeight: "500", cursor: "pointer", padding: "7px 13px",
+    display: "flex", alignItems: "center", gap: "5px", borderRadius: "7px",
+    transition: "color 0.2s, background 0.2s", fontFamily: "inherit",
+  },
+  dropdownMenu: {
+    position: "absolute", top: "calc(100% + 8px)", left: 0,
+    backgroundColor: "rgba(9, 9, 11, 0.97)", backdropFilter: "blur(24px)",
+    WebkitBackdropFilter: "blur(24px)", borderRadius: "12px", padding: "6px",
+    boxShadow: "0 16px 48px rgba(0,0,0,0.55)", zIndex: 200, minWidth: "185px",
+    border: "1px solid rgba(255,255,255,0.09)",
+  },
+  dropdownItem: {
+    display: "block", width: "100%", padding: "9px 12px", background: "none",
+    color: "#a1a1aa", border: "none", textAlign: "left", cursor: "pointer",
+    borderRadius: "7px", transition: "background 0.2s, color 0.2s",
+    fontSize: "14px", fontFamily: "inherit",
+  },
+  points: {
+    color: "#a5b4fc", fontWeight: "600", padding: "6px 14px",
+    backgroundColor: "rgba(99,102,241,0.1)", borderRadius: "100px",
+    fontSize: "13px", display: "flex", alignItems: "center", gap: "6px",
+    border: "1px solid rgba(99,102,241,0.22)",
+    transition: "transform 0.2s, background 0.2s",
+  },
+  profileButton: {
+    background: "rgba(255,255,255,0.05)", padding: "7px 15px", borderRadius: "8px",
+    color: "#a1a1aa", border: "1px solid rgba(255,255,255,0.1)", cursor: "pointer",
+    display: "flex", alignItems: "center", gap: "7px", fontSize: "14px", fontWeight: "500",
+    transition: "all 0.2s ease", fontFamily: "inherit",
+  },
+  roomButton: {
+    padding: "7px 14px", color: "white",
+    background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+    border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer",
+    boxShadow: "0 2px 12px rgba(99,102,241,0.3)", transition: "all 0.2s ease",
+    fontSize: "13px", display: "flex", alignItems: "center", gap: "5px",
+    fontFamily: "inherit", whiteSpace: "nowrap",
+  },
+  modalOverlay: {
+    position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh",
+    background: "rgba(0,0,0,0.72)", backdropFilter: "blur(12px)",
+    WebkitBackdropFilter: "blur(12px)", zIndex: 9999,
+    display: "flex", alignItems: "center", justifyContent: "center",
+  },
+  modalContent: {
+    backgroundColor: "#111118", padding: "28px 24px", borderRadius: "16px",
+    display: "flex", flexDirection: "column", alignItems: "stretch", gap: "16px",
+    border: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 24px 80px rgba(0,0,0,0.6)",
+    maxWidth: "340px", width: "90%",
+  },
+  modalInput: {
+    backgroundColor: "rgba(255,255,255,0.04)", color: "#fafafa",
+    border: "1px solid rgba(255,255,255,0.1)", borderRadius: "10px",
+    padding: "12px 16px", outline: "none", width: "100%", fontSize: "14px",
+    transition: "border-color 0.2s, box-shadow 0.2s", fontFamily: "inherit",
+    boxSizing: "border-box",
+  },
+  mobileMenu: {
+    position: "fixed", top: "68px", left: 0, right: 0,
+    backgroundColor: "rgba(9, 9, 11, 0.97)", backdropFilter: "blur(28px)",
+    WebkitBackdropFilter: "blur(28px)",
+    padding: "10px 16px 20px", zIndex: 999,
+    display: "flex", flexDirection: "column", gap: "2px",
+    borderBottom: "1px solid rgba(255,255,255,0.07)",
+    boxShadow: "0 16px 48px rgba(0,0,0,0.5)",
+  },
+  mobileMenuDivider: { height: "1px", backgroundColor: "rgba(255,255,255,0.07)", margin: "6px 0" },
+  rightSection: { display: "flex", alignItems: "center", gap: "10px" },
 };
 
 const Navbar = () => {
-  // States compressed into one area
   const [state, setState] = useState({
     showMenu: false,
     joinRoomId: "",
@@ -46,223 +127,175 @@ const Navbar = () => {
     windowWidth: window.innerWidth,
     showMobileMenu: false,
     hoverLogo: false,
-    focusedInput: false
+    focusedInput: false,
   });
-  
-  // Helpers & hooks
+
   const navigate = useNavigate();
   const location = useLocation();
   const isDsaDashboard = location.pathname.startsWith("/dsadashboard");
   const isMobile = state.windowWidth <= 768;
-  
-  // Simplified state updates
   const updateState = (newState) => setState(prev => ({ ...prev, ...newState }));
-  
-  // Effect for window resize and user points
+
   useEffect(() => {
     const handleResize = () => updateState({ windowWidth: window.innerWidth });
     window.addEventListener("resize", handleResize);
-    
+
     const fetchUserPoints = async () => {
       try {
-        const response = await axios.get(process.env.REACT_APP_USER_POINTS_VIEW, { withCredentials: true });
-        if (response.data && typeof response.data.points === "number") updateState({ userPoints: response.data.points });
-      } catch (error) { console.error("Failed to fetch user points:", error); }
+        const res = await axios.get(process.env.REACT_APP_USER_POINTS_VIEW, { withCredentials: true });
+        if (res.data && typeof res.data.points === "number") updateState({ userPoints: res.data.points });
+      } catch (e) { /* silently ignore */ }
     };
-    
     fetchUserPoints();
     return () => window.removeEventListener("resize", handleResize);
   }, []);
-  
-  // Navigation handlers - compressed
-  const navTo = (path) => () => navigate(path);
-  const toggleMenu = (menuName) => () => updateState({ [menuName]: !state[menuName] });
-  
-  // Room handlers
+
+  const navTo = (path) => () => { navigate(path); updateState({ showMobileMenu: false }); };
+  const toggleMenu = (key) => () => updateState({ [key]: !state[key] });
+
   const handleCreateRoom = async () => {
     try {
       const roomId = await createroom({ isReadOnly: true, fromNavbar: true });
-      console.log("✅ Room Created:", roomId);
       navigate(`/room/${roomId}`, { state: { isReadOnly: true, fromNavbar: true } });
-    } catch (error) { console.error("Failed to create room:", error); }
+    } catch (e) { console.error("Failed to create room:", e); }
   };
-  
+
   const handleJoinRoom = async () => {
     if (!state.joinRoomId) { alert("Please enter a Room ID!"); return; }
     try {
       const roomId = await joinroom(state.joinRoomId);
-      console.log("✅ Room Joined:", roomId);
       updateState({ showJoinModal: false });
       navigate(`/room/${roomId}`, { state: { isReadOnly: true, fromNavbar: true } });
-    } catch (error) {
-      console.error("❌ Failed to join room:", error);
+    } catch (e) {
       alert("Failed to join the room. Please check the Room ID and try again.");
     }
   };
-  
-  const handleLogoutClick = () => {
-    updateState({ showMenu: false });
-    handleLogout(navigate);
-  };
 
-  // Menu items for reusability
+  const handleLogoutClick = () => { updateState({ showMenu: false }); handleLogout(navigate); };
+
   const courseItems = [
-    { label: "DSA Course", action: navTo("/dsacourses") },
+    { label: "DSA Course",    action: navTo("/dsacourses") },
     { label: "Web Dev Course", action: navTo("/webdev") },
-    { label: "DevOps Course", action: navTo("/devops") }
-  ];
-  
-  const profileItems = [
-    { label: "User Details", action: navTo("/userdetails") },
-    { label: "Follow Dashboard", action: navTo("/follow-dashboard") },
-    { label: "Upload Post", action: navTo("/upload-post") },
-    { label: "Problem Solved", action: navTo("/solvedproblemslist") },
-    { label: "Logout", action: handleLogoutClick }
-  ];
-  
-  const navLinks = [
-    { label: "Home", path: "/Feed", action: navTo("/Feed") },
-    { label: "About", path: "/about", action: navTo("/about") },
-    { label: "Web Dev", path: "/webdevprojects", action: navTo("/webdevprojects") },
-    { label: "DSA", path: "/dsadashboard", action: navTo("/dsadashboard") },
-    { label: "DevOps", path: "/devopsprojects", action: navTo("/devopsprojects") }
+    { label: "DevOps Course",  action: navTo("/devops") },
   ];
 
-  // Render helper functions
-  const renderDropdownMenu = (items) => (
-    <div style={{
-      ...styles.dropdownMenu,
-      animation: "fadeIn 0.3s ease-out forwards"
-    }}>
-      {items.map((item, idx) => (
-        <button 
-          key={idx} 
-          onClick={item.action} 
-          style={styles.dropdownItem}
-          onMouseOver={(e) => {
-            e.target.style.backgroundColor = "rgba(148, 180, 193, 0.2)";
-            e.target.style.transform = "translateX(5px)";
-          }}
-          onMouseOut={(e) => {
-            e.target.style.backgroundColor = "transparent";
-            e.target.style.transform = "translateX(0)";
-          }}>
+  const profileItems = [
+    { label: "User Details",       action: navTo("/userdetails") },
+    { label: "Follow Dashboard",   action: navTo("/follow-dashboard") },
+    { label: "Upload Post",        action: navTo("/upload-post") },
+    { label: "Problem Solved",     action: navTo("/solvedproblemslist") },
+    { label: "Logout",             action: handleLogoutClick },
+  ];
+
+  const navLinks = [
+    { label: "Home",    path: "/Feed",           action: navTo("/Feed") },
+    { label: "About",   path: "/about",          action: navTo("/about") },
+    { label: "Web Dev", path: "/webdevprojects",  action: navTo("/webdevprojects") },
+    { label: "DSA",     path: "/dsadashboard",   action: navTo("/dsadashboard") },
+    { label: "DevOps",  path: "/devopsprojects",  action: navTo("/devopsprojects") },
+  ];
+
+  const renderDropdown = (items) => (
+    <div style={S.dropdownMenu}>
+      {items.map((item, i) => (
+        <button
+          key={i}
+          onClick={item.action}
+          style={S.dropdownItem}
+          onMouseOver={(e) => { e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.06)"; e.currentTarget.style.color = "#fafafa"; }}
+          onMouseOut={(e)  => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = "#a1a1aa"; }}
+        >
           {item.label}
         </button>
       ))}
     </div>
   );
 
-  // Dynamic logo style based on hover state
-  const logoStyle = {
-    ...styles.logo,
-    transform: state.hoverLogo ? "scale(1.05)" : "scale(1)"
-  };
-  
-  const logoImgStyle = {
-    ...styles.logoImg,
-    transform: state.hoverLogo ? "rotate(5deg)" : "rotate(0deg)"
-  };
+  const ChevronDown = () => (
+    <svg width="12" height="8" viewBox="0 0 12 8" fill="none" style={{ flexShrink: 0, transition: "transform 0.2s" }}>
+      <path d="M1 1L6 6L11 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+
+  const ProfileIcon = () => (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
+    </svg>
+  );
+
+  const PointsIcon = () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="8" r="7" />
+      <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" />
+    </svg>
+  );
 
   return (
     <>
-      {/* Add global keyframes */}
-      <style>
-        {`
-          @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-          @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-          @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
-        `}
-      </style>
-      
-      <nav style={styles.nav}>
-        {/* Logo with hover effect */}
-        <div 
-          onClick={navTo("/Feed")} 
-          style={logoStyle}
-          onMouseEnter={() => updateState({ hoverLogo: true })}
-          onMouseLeave={() => updateState({ hoverLogo: false })}>
-          <img src="/wecode logo.png" alt="WeCode" style={logoImgStyle} />
-          <span style={{
-            ...styles.logoText,
-            color: state.hoverLogo ? "#FFFFFF" : "#ECEFCA"
-          }}>WeCode</span>
+      <style>{`
+        @keyframes wc-nav-slide { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes wc-fade-in   { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes wc-nav-pulse { 0%,100% { transform:scale(1); } 50% { transform:scale(1.04); } }
+        .wc-nav-link-item:hover { color: #fafafa !important; background: rgba(255,255,255,0.06) !important; }
+        .wc-dropdown-btn:hover  { color: #fafafa !important; background: rgba(255,255,255,0.06) !important; }
+        .wc-profile-btn:hover   { color: #fafafa !important; background: rgba(255,255,255,0.08) !important; border-color: rgba(255,255,255,0.18) !important; }
+        .wc-room-btn:hover      { transform: translateY(-1px) !important; box-shadow: 0 6px 24px rgba(99,102,241,0.5) !important; }
+        .wc-points-badge:hover  { background: rgba(99,102,241,0.18) !important; transform: scale(1.05); }
+        .wc-logo-wrap:hover .wc-logo-icon { transform: rotate(-6deg) scale(1.08); box-shadow: 0 4px 24px rgba(99,102,241,0.55) !important; }
+        .wc-mobile-item:hover { color: #fafafa !important; background: rgba(255,255,255,0.06) !important; padding-left: 18px !important; }
+      `}</style>
+
+      <nav style={S.nav}>
+        {/* Logo */}
+        <div
+          className="wc-logo-wrap"
+          onClick={navTo("/Feed")}
+          style={S.logo}
+        >
+          <div className="wc-logo-icon" style={S.logoIcon}>W</div>
+          <span style={S.logoText}>WeCode</span>
         </div>
 
-        {/* Mobile hamburger menu */}
+        {/* Mobile hamburger */}
         {isMobile && (
           <div style={{ position: "relative" }}>
-            <button 
-              onClick={toggleMenu("showMobileMenu")} 
+            <button
+              onClick={toggleMenu("showMobileMenu")}
               style={{
-                ...styles.hamburgerButton,
-                transform: state.showMobileMenu ? "rotate(90deg)" : "rotate(0deg)"
-              }}>
-              ☰
+                background: "transparent", border: "none", cursor: "pointer",
+                display: "flex", flexDirection: "column", justifyContent: "center",
+                gap: "5px", padding: "6px 8px", borderRadius: "6px",
+              }}
+              aria-label="Toggle navigation"
+            >
+              <span style={{ display: "block", width: "22px", height: "2px", background: "#fafafa", borderRadius: "2px", transition: "all 0.3s", transform: state.showMobileMenu ? "rotate(45deg) translateY(7px)" : "none" }} />
+              <span style={{ display: "block", width: "22px", height: "2px", background: "#fafafa", borderRadius: "2px", transition: "all 0.3s", opacity: state.showMobileMenu ? 0 : 1 }} />
+              <span style={{ display: "block", width: "22px", height: "2px", background: "#fafafa", borderRadius: "2px", transition: "all 0.3s", transform: state.showMobileMenu ? "rotate(-45deg) translateY(-7px)" : "none" }} />
             </button>
-            
+
             {state.showMobileMenu && (
-              <div style={styles.mobileMenu}>
-                <div style={{ padding: "5px 12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ fontWeight: "600", color: "#ECEFCA" }}>Menu</span>
-                  <span style={{
-                    ...styles.points,
-                    animation: "pulse 1.5s infinite"
-                  }}>Points: {state.userPoints}</span>
+              <div style={{ ...S.mobileMenu, animation: "wc-nav-slide 0.25s ease" }}>
+                <div style={{ padding: "6px 12px 4px", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+                  <span style={{ fontWeight: "600", color: "#fafafa", fontSize: "14px" }}>Navigation</span>
+                  <div style={{ ...S.points, fontSize: "12px", padding: "4px 10px" }}>
+                    <PointsIcon /> {state.userPoints}
+                  </div>
                 </div>
-                
-                <div style={styles.mobileMenuDivider} />
-                
+                <div style={S.mobileMenuDivider} />
                 {isDsaDashboard && (
                   <>
-                    <div style={{ display: "flex", gap: "8px", padding: "5px" }}>
-                      <button 
-                        onClick={handleCreateRoom} 
-                        style={styles.roomButton}
-                        onMouseOver={(e) => {
-                          e.target.style.backgroundColor = "#94B4C1";
-                          e.target.style.transform = "translateY(-2px)";
-                        }}
-                        onMouseOut={(e) => {
-                          e.target.style.backgroundColor = "#547792";
-                          e.target.style.transform = "translateY(0)";
-                        }}>
-                        Create Room
-                      </button>
-                      <button 
-                        onClick={() => updateState({ showJoinModal: true })} 
-                        style={styles.roomButton}
-                        onMouseOver={(e) => {
-                          e.target.style.backgroundColor = "#94B4C1";
-                          e.target.style.transform = "translateY(-2px)";
-                        }}
-                        onMouseOut={(e) => {
-                          e.target.style.backgroundColor = "#547792";
-                          e.target.style.transform = "translateY(0)";
-                        }}>
-                        Join Room
-                      </button>
+                    <div style={{ display: "flex", gap: "8px", padding: "4px 4px" }}>
+                      <button onClick={handleCreateRoom} className="wc-room-btn" style={S.roomButton}>Create Room</button>
+                      <button onClick={() => updateState({ showJoinModal: true, showMobileMenu: false })} className="wc-room-btn" style={S.roomButton}>Join Room</button>
                     </div>
-                    <div style={styles.mobileMenuDivider} />
+                    <div style={S.mobileMenuDivider} />
                   </>
                 )}
-                
-                {/* Mobile navigation links */}
-                {[...navLinks, ...courseItems, ...profileItems].map((item, idx) => (
-                  <span 
-                    key={idx} 
-                    onClick={item.action} 
-                    style={{ ...styles.link, display: "block", padding: "8px 12px" }}
-                    onMouseOver={(e) => {
-                      e.target.style.backgroundColor = "rgba(148, 180, 193, 0.15)";
-                      e.target.style.paddingLeft = "15px";
-                    }}
-                    onMouseOut={(e) => {
-                      e.target.style.backgroundColor = "transparent";
-                      e.target.style.paddingLeft = "12px";
-                    }}>
+                {[...navLinks, ...courseItems, ...profileItems].map((item, i) => (
+                  <button key={i} onClick={item.action} className="wc-mobile-item" style={{ ...S.dropdownItem, padding: "10px 12px", fontSize: "14.5px", width: "100%", transition: "color 0.2s, background 0.2s, padding-left 0.2s" }}>
                     {item.label}
-                  </span>
+                  </button>
                 ))}
               </div>
             )}
@@ -272,172 +305,83 @@ const Navbar = () => {
         {/* Desktop navigation */}
         {!isMobile && (
           <>
-            <div style={styles.menuContainer}>
-              {navLinks.map((link, idx) => (
-                <span 
-                  key={idx} 
-                  style={location.pathname === link.path ? styles.activeLink : styles.link} 
+            <div style={S.menuContainer}>
+              {navLinks.map((link, i) => (
+                <button
+                  key={i}
+                  className="wc-nav-link-item"
                   onClick={link.action}
-                  onMouseOver={(e) => {
-                    e.target.style.backgroundColor = "rgba(148, 180, 193, 0.15)";
-                    e.target.style.transform = "translateY(-2px)";
-                  }}
-                  onMouseOut={(e) => {
-                    e.target.style.backgroundColor = location.pathname === link.path ? "rgba(148, 180, 193, 0.15)" : "transparent";
-                    e.target.style.transform = "translateY(0)";
-                  }}>
+                  style={location.pathname === link.path ? S.activeLink : S.link}
+                >
                   {link.label}
-                </span>
-              ))}
-              
-              {/* Courses dropdown */}
-              <div 
-                style={{
-                  ...styles.dropdownContainer,
-                  transform: state.showCoursesMenu ? "translateY(-2px)" : "translateY(0)"
-                }}>
-                <button 
-                  onClick={toggleMenu("showCoursesMenu")} 
-                  style={styles.dropdownButton}
-                  onMouseOver={(e) => e.target.style.backgroundColor = "rgba(148, 180, 193, 0.15)"}
-                  onMouseOut={(e) => e.target.style.backgroundColor = "transparent"}>
-                  Courses <span style={{ 
-                    fontSize: "10px", 
-                    marginTop: "2px",
-                    transform: state.showCoursesMenu ? "rotate(180deg)" : "rotate(0deg)",
-                    transition: "transform 0.3s ease"
-                  }}>▼</span>
                 </button>
-                {state.showCoursesMenu && renderDropdownMenu(courseItems)}
+              ))}
+
+              {/* Courses dropdown */}
+              <div style={S.dropdownContainer}>
+                <button
+                  className="wc-dropdown-btn"
+                  onClick={toggleMenu("showCoursesMenu")}
+                  style={S.dropdownButton}
+                >
+                  Courses <ChevronDown />
+                </button>
+                {state.showCoursesMenu && renderDropdown(courseItems)}
               </div>
             </div>
-            
-            <div style={styles.rightSection}>
-              {/* Profile dropdown (moved left) */}
-              <div style={styles.dropdownContainer}>
-                <button 
-                  onClick={toggleMenu("showMenu")} 
-                  style={styles.profileButton}
-                  onMouseOver={(e) => {
-                    e.target.style.boxShadow = "0 2px 10px rgba(84, 119, 146, 0.6)";
-                    e.target.style.transform = "translateY(-2px)";
-                  }}
-                  onMouseOut={(e) => {
-                    e.target.style.boxShadow = "none";
-                    e.target.style.transform = "translateY(0)";
-                  }}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle>
-                  </svg>
-                  Profile
+
+            <div style={S.rightSection}>
+              {/* Profile dropdown */}
+              <div style={S.dropdownContainer}>
+                <button className="wc-profile-btn" onClick={toggleMenu("showMenu")} style={S.profileButton}>
+                  <ProfileIcon /> Profile
                 </button>
-                {state.showMenu && renderDropdownMenu(profileItems)}
+                {state.showMenu && renderDropdown(profileItems)}
               </div>
-              
-              {/* Room buttons (conditional) */}
+
+              {/* Room buttons — DSA dashboard only */}
               {isDsaDashboard && (
-                <div style={{ display: "flex", gap: "10px" }}>
-                  <button 
-                    onClick={handleCreateRoom} 
-                    style={styles.roomButton}
-                    onMouseOver={(e) => {
-                      e.target.style.backgroundColor = "#94B4C1";
-                      e.target.style.transform = "translateY(-2px)";
-                    }}
-                    onMouseOut={(e) => {
-                      e.target.style.backgroundColor = "#547792";
-                      e.target.style.transform = "translateY(0)";
-                    }}>
-                    Create Room
-                  </button>
-                  <button 
-                    onClick={() => updateState({ showJoinModal: true })} 
-                    style={styles.roomButton}
-                    onMouseOver={(e) => {
-                      e.target.style.backgroundColor = "#94B4C1";
-                      e.target.style.transform = "translateY(-2px)";
-                    }}
-                    onMouseOut={(e) => {
-                      e.target.style.backgroundColor = "#547792";
-                      e.target.style.transform = "translateY(0)";
-                    }}>
-                    Join Room
-                  </button>
+                <div style={{ display: "flex", gap: "8px" }}>
+                  <button className="wc-room-btn" onClick={handleCreateRoom} style={S.roomButton}>Create Room</button>
+                  <button className="wc-room-btn" onClick={() => updateState({ showJoinModal: true })} style={S.roomButton}>Join Room</button>
                 </div>
               )}
-              
-              {/* Points display with pulsing animation */}
-              <div 
-                style={{
-                  ...styles.points,
-                  animation: "pulse 2s infinite"
-                }}
-                onMouseOver={(e) => {
-                  e.target.style.backgroundColor = "rgba(148, 180, 193, 0.3)";
-                  e.target.style.animation = "none";
-                  e.target.style.transform = "scale(1.1)";
-                }}
-                onMouseOut={(e) => {
-                  e.target.style.backgroundColor = "rgba(148, 180, 193, 0.15)";
-                  e.target.style.animation = "pulse 2s infinite";
-                  e.target.style.transform = "scale(1)";
-                }}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
-                </svg>
-                {state.userPoints}
+
+              {/* Points badge */}
+              <div className="wc-points-badge" style={S.points}>
+                <PointsIcon /> {state.userPoints}
               </div>
             </div>
           </>
         )}
-        
-        {/* Join Room Modal with enhanced animations */}
+
+        {/* Join Room Modal */}
         {state.showJoinModal && (
-          <div 
-            style={styles.modalOverlay} 
-            onClick={() => updateState({ showJoinModal: false })}>
-            <div 
-              style={styles.modalContent} 
-              onClick={(e) => e.stopPropagation()}>
-              <h3 style={{ margin: "0 0 10px 0", color: "#ECEFCA", textAlign: "center" }}>Join Room</h3>
+          <div style={{ ...S.modalOverlay, animation: "wc-fade-in 0.2s ease" }} onClick={() => updateState({ showJoinModal: false })}>
+            <div style={{ ...S.modalContent, animation: "wc-nav-slide 0.25s ease" }} onClick={(e) => e.stopPropagation()}>
+              <h3 style={{ margin: 0, color: "#fafafa", fontSize: "18px", fontWeight: "700", letterSpacing: "-0.3px" }}>Join a Room</h3>
               <input
                 type="text"
                 placeholder="Enter Room ID"
                 value={state.joinRoomId}
                 onChange={(e) => updateState({ joinRoomId: e.target.value })}
                 style={{
-                  ...styles.modalInput,
-                  borderColor: state.focusedInput ? "#94B4C1" : "rgba(148, 180, 193, 0.3)",
-                  boxShadow: state.focusedInput ? "0 0 0 2px rgba(148, 180, 193, 0.2)" : "none"
+                  ...S.modalInput,
+                  borderColor: state.focusedInput ? "rgba(99,102,241,0.5)" : "rgba(255,255,255,0.1)",
+                  boxShadow: state.focusedInput ? "0 0 0 3px rgba(99,102,241,0.12)" : "none",
                 }}
                 onFocus={() => updateState({ focusedInput: true })}
                 onBlur={() => updateState({ focusedInput: false })}
+                onKeyDown={(e) => e.key === "Enter" && handleJoinRoom()}
               />
-              <div style={{ display: "flex", gap: "10px", width: "100%", justifyContent: "center" }}>
-                <button 
-                  onClick={handleJoinRoom} 
-                  style={styles.roomButton}
-                  onMouseOver={(e) => {
-                    e.target.style.backgroundColor = "#94B4C1";
-                    e.target.style.transform = "translateY(-2px)";
-                  }}
-                  onMouseOut={(e) => {
-                    e.target.style.backgroundColor = "#547792";
-                    e.target.style.transform = "translateY(0)";
-                  }}>
+              <div style={{ display: "flex", gap: "8px" }}>
+                <button className="wc-room-btn" onClick={handleJoinRoom} style={{ ...S.roomButton, flex: 1, justifyContent: "center" }}>
                   Join
                 </button>
-                <button 
-                  onClick={() => updateState({ showJoinModal: false })} 
-                  style={{ ...styles.roomButton, backgroundColor: "rgba(148, 180, 193, 0.2)" }}
-                  onMouseOver={(e) => {
-                    e.target.style.backgroundColor = "rgba(148, 180, 193, 0.3)";
-                    e.target.style.transform = "translateY(-2px)";
-                  }}
-                  onMouseOut={(e) => {
-                    e.target.style.backgroundColor = "rgba(148, 180, 193, 0.2)";
-                    e.target.style.transform = "translateY(0)";
-                  }}>
+                <button
+                  onClick={() => updateState({ showJoinModal: false })}
+                  style={{ ...S.roomButton, flex: 1, justifyContent: "center", background: "rgba(255,255,255,0.06)", boxShadow: "none", border: "1px solid rgba(255,255,255,0.1)" }}
+                >
                   Cancel
                 </button>
               </div>

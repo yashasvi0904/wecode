@@ -1,834 +1,326 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import Navbar from "../../Layout1/Navbar";
 import Footer from "../../Layout1/Footer";
-import AOS from "aos";
-import "aos/dist/aos.css";
+import "./AboutScreen.css";
+
+const fadeUp = { hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0 } };
+const FadeIn = ({ children, delay = 0, className = "" }) => (
+  <motion.div
+    className={className}
+    variants={fadeUp}
+    initial="hidden"
+    whileInView="visible"
+    viewport={{ once: true, margin: "-60px" }}
+    transition={{ duration: 0.65, delay, ease: [0.22, 1, 0.36, 1] }}
+  >
+    {children}
+  </motion.div>
+);
 
 const AboutScreen = () => {
-  React.useEffect(() => {
-    AOS.init({ duration: 1200 });
-  }, []);
+  const navigate = useNavigate();
 
   const team = [
     {
-      name: "Tanush Chawla",
+      name: "Yashasvi",
       role: "Lead Backend Engineer & Project Coordinator",
-      bio: "Passionate about building scalable backend systems and ensuring smooth project coordination, Tanush is the powerhouse behind WeCode's real-time collaboration engine.",
-      github: "https://github.com/Tanushh18",
-      image: "/tanush-photo.jpeg",
+      bio: "Passionate about building scalable backend systems and ensuring smooth project coordination, Yashasvi is the powerhouse behind WeCode's real-time collaboration engine.",
+      github: "https://github.com/yashasvi0904",
+      image: "yashasvi pic.jpeg",
     },
-    // Team members array remains open for adding more team members
   ];
 
-  // Color palette
-  const colors = {
-    primary: "#213448",
-    secondary: "#547792",
-    tertiary: "#94B4C1",
-    accent: "#ECEFCA",
-    text: "#ECEFCA",
-    textDark: "#213448",
-    cardBg: "#FFFFFF0D" // Semi-transparent white for glass effect
-  };
+  const timelineItems = [
+    { date: "December 2024", event: "Initial idea generation and project brainstorming for WeCode." },
+    { date: "January 2025",  event: "Architecture design and technology stack finalization." },
+    { date: "February 2025", event: "Core backend and frontend development begins." },
+    { date: "March 2025",    event: "Integration of real-time collaboration and live coding features." },
+    { date: "April 2025",    event: "Testing, bug fixing, and preparation for early access release." },
+  ];
+
+  const platformStats = [
+    { number: "500+",   text: "Rooms Created" },
+    { number: "1200+",  text: "Collaborations" },
+    { number: "800+",   text: "Users Connected" },
+    { number: "99.9%",  text: "Server Uptime" },
+    { number: "50+",    text: "Countries Reached" },
+    { number: "150+",   text: "Open Source PRs" },
+  ];
+
+  const whyCards = [
+    { icon: "🎥", title: "Video-First Collaboration",       desc: "Connect face-to-face while coding together in real-time with built-in WebRTC video." },
+    { icon: "📚", title: "All-in-One Learning Hub",         desc: "Resources, tools, and guidance all in one seamless platform." },
+    { icon: "⚡", title: "Real-Time Collaboration Engine",  desc: "Work on code simultaneously with zero latency." },
+    { icon: "🌐", title: "Build, Connect, and Grow",        desc: "Join a global community of like-minded developers." },
+    { icon: "🔒", title: "Secure Sessions",                 desc: "End-to-end encrypted rooms with fine-grained privacy controls." },
+    { icon: "📱", title: "Fully Responsive",                desc: "A polished experience on every screen — mobile, tablet, and desktop." },
+  ];
+
+  const achievements = [
+    { icon: "🏆", title: "Top 10 Collaboration Tools", desc: "Recognized among top 10 collaboration platforms for coders." },
+    { icon: "🌍", title: "Global Expansion",            desc: "Users across 50+ countries actively collaborating every day." },
+    { icon: "🎯", title: "Innovation Award 2025",       desc: "Awarded for excellence in real-time communication solutions." },
+  ];
+
+  const techStack = ["ReactJS", "NodeJS", "ExpressJS", "MongoDB", "Socket.IO", "WebRTC", "Firebase"];
 
   return (
-    <div
-      style={{
-        backgroundColor: colors.primary,
-        minHeight: "100vh",
-        overflowX: "hidden",
-        color: colors.text,
-      }}
-    >
+    <div className="ab-body">
       <Navbar />
-      
-      {/* Hero Section */}
-      <div 
-        style={{
-          background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)`,
-          padding: "5rem 2rem",
-          textAlign: "center",
-          borderBottom: `4px solid ${colors.tertiary}`
-        }}
-        data-aos="fade-up"
-      >
-        <h1 style={{ 
-          fontSize: "3.5rem", 
-          fontWeight: "700",
-          color: colors.accent,
-          marginBottom: "1.5rem"
-        }}>
-          About WeCode
-        </h1>
-        <p style={{ 
-          fontSize: "1.4rem", 
-          maxWidth: "800px",
-          margin: "0 auto",
-          color: colors.text,
-          lineHeight: "1.8"
-        }}>
-          Empowering developers to collaborate, learn, and innovate in a seamless environment
-        </p>
-      </div>
 
-      {/* Team Section */}
-      <div style={{ 
-        padding: "5rem 2rem", 
-        textAlign: "center",
-        background: `linear-gradient(180deg, ${colors.primary} 0%, ${colors.secondary}30 100%)`,
-      }}>
-        <h2
-          style={{ 
-            fontSize: "2.5rem", 
-            fontWeight: "600",
-            color: colors.accent,
-            marginBottom: "3rem",
-            position: "relative",
-            display: "inline-block"
-          }}
-          data-aos="fade-up"
+      {/* ===== HERO ===== */}
+      <section className="ab-hero">
+        <div className="ab-hero-glow" />
+        <div className="ab-hero-grid" />
+        <motion.div
+          className="ab-hero-inner"
+          initial={{ opacity: 0, y: 32 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1] }}
         >
-          <span style={{
-            position: "relative",
-            zIndex: "1"
-          }}>Meet Our Team</span>
-          <div style={{
-            position: "absolute",
-            height: "12px",
-            width: "50%",
-            backgroundColor: colors.tertiary,
-            bottom: "8px",
-            left: "25%",
-            zIndex: "0",
-            opacity: "0.4"
-          }}></div>
-        </h2>
-        
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            gap: "2.5rem",
-            flexWrap: "wrap",
-            marginTop: "2rem",
-          }}
-        >
-          {team.map((member, idx) => (
-            <div
-              style={{
-                background: colors.cardBg,
-                backdropFilter: "blur(10px)",
-                borderRadius: "12px",
-                padding: "2rem",
-                textAlign: "center",
-                color: colors.text,
-                width: "320px",
-                boxShadow: `0 8px 32px 0 rgba(0,0,0,0.2)`,
-                border: `1px solid ${colors.tertiary}40`,
-                transition: "transform 0.3s, box-shadow 0.3s",
-                cursor: "pointer",
-                marginBottom: "2rem",
-              }}
-              key={idx}
-              data-aos="fade-up"
-              data-aos-delay={idx * 100}
-              onMouseOver={(e) => {
-                e.currentTarget.style.transform = "translateY(-10px)";
-                e.currentTarget.style.boxShadow = `0 12px 32px 0 rgba(0,0,0,0.3)`;
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.boxShadow = `0 8px 32px 0 rgba(0,0,0,0.2)`;
-              }}
-            >
-              <div style={{
-                width: "140px",
-                height: "140px",
-                margin: "0 auto 1.5rem",
-                borderRadius: "50%",
-                padding: "5px",
-                background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`,
-              }}>
-                <img
-                  src={member.image ? member.image : "/default-image.jpg"}
-                  alt={member.name}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                    borderRadius: "50%",
-                    border: `3px solid ${colors.accent}`,
-                  }}
-                />
-              </div>
-              <h2 style={{ fontSize: "1.6rem", marginBottom: "0.5rem", fontWeight: "600" }}>
-                {member.name}
-              </h2>
-              <h4
-                style={{
-                  fontSize: "1rem",
-                  fontWeight: "500",
-                  marginBottom: "1.2rem",
-                  color: colors.tertiary,
-                }}
-              >
-                {member.role}
-              </h4>
-              <p style={{ fontSize: "0.95rem", lineHeight: "1.6", marginBottom: "1.5rem" }}>
-                {member.bio}
-              </p>
-              <a
-                href={member.github !== "#" ? member.github : "#"}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: "inline-block",
-                  padding: "0.6rem 1.5rem",
-                  borderRadius: "30px",
-                  background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`,
-                  color: colors.accent,
-                  textDecoration: "none",
-                  fontWeight: "500",
-                  transition: "transform 0.2s, opacity 0.2s",
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.transform = "scale(1.05)";
-                  e.currentTarget.style.opacity = "0.95";
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.transform = "scale(1)";
-                  e.currentTarget.style.opacity = "1";
-                }}
-              >
-                GitHub Profile
-              </a>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Mission Section */}
-      <div style={{ 
-        padding: "5rem 2rem", 
-        textAlign: "center",
-        background: colors.secondary,
-      }}>
-        <div 
-          style={{
-            maxWidth: "1000px",
-            margin: "0 auto",
-            background: colors.primary,
-            borderRadius: "16px",
-            padding: "3rem",
-            boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
-          }}
-          data-aos="fade-up"
-        >
-          <h2
-            style={{ 
-              fontSize: "2.5rem", 
-              fontWeight: "600",
-              color: colors.accent,
-              marginBottom: "2rem"
-            }}
-          >
-            Our Mission
-          </h2>
-          <p
-            style={{
-              fontSize: "1.2rem",
-              lineHeight: "1.8",
-              color: colors.tertiary,
-            }}
-          >
-            At WeCode, our mission is to empower developers around the world to
-            collaborate, learn, and innovate seamlessly. We believe that coding
-            should be accessible, interactive, and fun. By combining real-time
-            collaboration, video conferencing, and structured learning
-            resources, we aim to build a global community of passionate coders.
+          <div className="ab-hero-eyebrow">✦ Our Story</div>
+          <h1 className="ab-hero-title">
+            About <span className="ab-gradient-text">WeCode</span>
+          </h1>
+          <p className="ab-hero-subtitle">
+            Empowering developers to collaborate, learn, and innovate — together,
+            in a seamless and futuristic environment.
           </p>
-        </div>
-      </div>
+        </motion.div>
+      </section>
 
-      {/* Timeline Section */}
-      <div style={{ 
-        padding: "5rem 2rem", 
-        background: `linear-gradient(0deg, ${colors.primary} 0%, ${colors.secondary} 100%)`,
-      }}>
-        <h2
-          style={{ 
-            fontSize: "2.5rem", 
-            fontWeight: "600",
-            color: colors.accent,
-            marginBottom: "3rem",
-            textAlign: "center",
-            position: "relative",
-            display: "inline-block",
-            left: "50%",
-            transform: "translateX(-50%)"
-          }}
-          data-aos="fade-right"
-        >
-          <span style={{
-            position: "relative",
-            zIndex: "1"
-          }}>Project Timeline</span>
-          <div style={{
-            position: "absolute",
-            height: "12px",
-            width: "50%",
-            backgroundColor: colors.tertiary,
-            bottom: "8px",
-            left: "25%",
-            zIndex: "0",
-            opacity: "0.4"
-          }}></div>
-        </h2>
-
-        <div style={{
-          maxWidth: "800px",
-          margin: "0 auto",
-          position: "relative",
-        }}>
-          {/* Vertical line */}
-          <div style={{
-            position: "absolute",
-            width: "4px",
-            backgroundColor: colors.tertiary,
-            top: "0",
-            bottom: "0",
-            left: "50%",
-            marginLeft: "-2px",
-          }}></div>
-
-          {/* Timeline items */}
-          {[
-            { date: "December 2024", event: "Initial idea generation and project brainstorming for WeCode." },
-            { date: "January 2025", event: "Architecture design and technology stack finalization." },
-            { date: "February 2025", event: "Core backend and frontend development begins." },
-            { date: "March 2025", event: "Integration of real-time collaboration and live coding features." },
-            { date: "April 2025", event: "Testing, bug fixing, and preparation for early access release." }
-          ].map((item, idx) => (
-            <div 
-              key={idx}
-              style={{
-                padding: "20px 40px",
-                position: "relative",
-                width: "50%",
-                left: idx % 2 === 0 ? "0" : "50%",
-                marginBottom: "30px",
-              }}
-              data-aos={idx % 2 === 0 ? "fade-right" : "fade-left"}
-              data-aos-delay={idx * 100}
-            >
-              {/* Timeline content */}
-              <div style={{
-                padding: "20px",
-                backgroundColor: colors.cardBg,
-                borderRadius: "10px",
-                border: `1px solid ${colors.tertiary}40`,
-                backdropFilter: "blur(10px)",
-                boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
-              }}>
-                <h3 style={{
-                  fontSize: "1.3rem",
-                  color: colors.accent,
-                  marginBottom: "10px",
-                }}>
-                  {item.date}
-                </h3>
-                <p style={{
-                  fontSize: "1rem",
-                  lineHeight: "1.6",
-                  color: colors.text,
-                }}>
-                  {item.event}
-                </p>
-              </div>
-              
-              {/* Circle marker */}
-              <div style={{
-                position: "absolute",
-                width: "20px",
-                height: "20px",
-                backgroundColor: colors.accent,
-                borderRadius: "50%",
-                top: "30px",
-                right: idx % 2 === 0 ? "-10px" : "auto",
-                left: idx % 2 === 0 ? "auto" : "-10px",
-                zIndex: "1",
-              }}></div>
+      {/* ===== MISSION ===== */}
+      <section className="ab-section">
+        <div className="ab-section-inner">
+          <FadeIn>
+            <div className="ab-section-header center">
+              <div className="ab-eyebrow">✦ Our Mission</div>
+              <h2 className="ab-title">Why we built WeCode</h2>
             </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Platform Highlights */}
-      <div style={{ 
-        padding: "5rem 2rem", 
-        textAlign: "center",
-        background: colors.primary,
-      }}>
-        <h2
-          style={{ 
-            fontSize: "2.5rem", 
-            fontWeight: "600",
-            color: colors.accent,
-            marginBottom: "3rem",
-            position: "relative",
-            display: "inline-block"
-          }}
-          data-aos="fade-left"
-        >
-          <span style={{
-            position: "relative",
-            zIndex: "1"
-          }}>Platform Highlights</span>
-          <div style={{
-            position: "absolute",
-            height: "12px",
-            width: "50%",
-            backgroundColor: colors.tertiary,
-            bottom: "8px",
-            left: "25%",
-            zIndex: "0",
-            opacity: "0.4"
-          }}></div>
-        </h2>
-
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            flexWrap: "wrap",
-            gap: "1.5rem",
-            maxWidth: "1200px",
-            margin: "0 auto",
-          }}
-        >
-          {[
-            { number: "500+", text: "Rooms Created" },
-            { number: "1200+", text: "Collaborations Happened" },
-            { number: "800+", text: "Users Connected" },
-            { number: "99.9%", text: "Server Uptime" },
-            { number: "50+", text: "Countries Reached" },
-            { number: "150+", text: "Open Source Contributions" }
-          ].map((stat, idx) => (
-            <div
-              key={idx}
-              style={{
-                background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)`,
-                padding: "2rem",
-                borderRadius: "12px",
-                textAlign: "center",
-                width: "220px",
-                boxShadow: `0 8px 25px rgba(0,0,0,0.15)`,
-                border: `1px solid ${colors.tertiary}40`,
-                color: colors.text,
-                transition: "transform 0.3s, box-shadow 0.3s",
-              }}
-              data-aos="zoom-in"
-              data-aos-delay={idx * 75}
-              onMouseOver={(e) => {
-                e.currentTarget.style.transform = "translateY(-10px)";
-                e.currentTarget.style.boxShadow = `0 12px 30px rgba(0,0,0,0.3)`;
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.boxShadow = `0 8px 25px rgba(0,0,0,0.15)`;
-              }}
-            >
-              <h3 style={{ 
-                fontSize: "2.5rem", 
-                marginBottom: "1rem",
-                color: colors.accent,
-                fontWeight: "700"
-              }}>
-                {stat.number}
-              </h3>
-              <p style={{ 
-                fontSize: "1.1rem",
-                color: colors.tertiary
-              }}>
-                {stat.text}
+          </FadeIn>
+          <FadeIn delay={0.1}>
+            <div className="ab-mission-block">
+              <div className="ab-mission-glow" />
+              <p className="ab-mission-text">
+                At WeCode, our mission is to <strong>empower developers</strong> around the world to
+                collaborate, learn, and innovate seamlessly. We believe that coding should be
+                <strong> accessible, interactive, and fun.</strong> By combining real-time collaboration,
+                video conferencing, and structured learning resources, we aim to build a
+                <strong> global community of passionate coders</strong>.
               </p>
             </div>
-          ))}
+          </FadeIn>
         </div>
-      </div>
+      </section>
 
-      {/* Why WeCode Section */}
-      <div style={{ 
-        padding: "5rem 2rem", 
-        textAlign: "center",
-        background: `linear-gradient(45deg, ${colors.primary} 0%, ${colors.secondary} 100%)`,
-      }}>
-        <h2
-          style={{ 
-            fontSize: "2.5rem", 
-            fontWeight: "600",
-            color: colors.accent,
-            marginBottom: "3rem",
-            position: "relative",
-            display: "inline-block"
-          }}
-          data-aos="fade-right"
-        >
-          <span style={{
-            position: "relative",
-            zIndex: "1"
-          }}>Why WeCode?</span>
-          <div style={{
-            position: "absolute",
-            height: "12px",
-            width: "50%",
-            backgroundColor: colors.tertiary,
-            bottom: "8px",
-            left: "25%",
-            zIndex: "0",
-            opacity: "0.4"
-          }}></div>
-        </h2>
+      <hr className="ab-divider" />
 
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: "2rem",
-            justifyContent: "center",
-          }}
-        >
-          {[
-            {
-              title: "Video-First Collaboration",
-              description: "Connect face-to-face while coding together in real-time."
-            },
-            {
-              title: "All-in-One Learning Hub",
-              description: "Resources, tools, and guidance all in one seamless platform."
-            },
-            {
-              title: "Real-Time Collaboration Engine",
-              description: "Work on code simultaneously with zero latency."
-            },
-            {
-              title: "Build, Connect, and Grow",
-              description: "Join a community of like-minded developers."
-            }
-          ].map((feature, idx) => (
-            <div
-              key={idx}
-              style={{
-                background: colors.cardBg,
-                backdropFilter: "blur(10px)",
-                borderRadius: "12px",
-                padding: "2rem",
-                width: "280px",
-                border: `1px solid ${colors.tertiary}40`,
-                boxShadow: "0 8px 30px rgba(0,0,0,0.15)",
-                transition: "transform 0.3s",
-              }}
-              data-aos="fade-up"
-              data-aos-delay={idx * 100}
-              onMouseOver={(e) => {
-                e.currentTarget.style.transform = "translateY(-10px)";
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.transform = "translateY(0)";
-              }}
-            >
-              <h3 style={{ 
-                fontSize: "1.5rem", 
-                marginBottom: "1rem",
-                color: colors.accent,
-                fontWeight: "600"
-              }}>
-                {feature.title}
-              </h3>
-              <p style={{ 
-                fontSize: "1rem",
-                lineHeight: "1.6",
-                color: colors.text
-              }}>
-                {feature.description}
+      {/* ===== TEAM ===== */}
+      <section className="ab-section">
+        <div className="ab-section-inner">
+          <FadeIn>
+            <div className="ab-section-header center">
+              <div className="ab-eyebrow">✦ The Team</div>
+              <h2 className="ab-title">Meet the builders</h2>
+              <p className="ab-subtitle" style={{ margin: "0 auto" }}>
+                Passionate engineers who turned an idea into a platform used by developers worldwide.
               </p>
             </div>
-          ))}
+          </FadeIn>
+
+          <div className="ab-team-grid">
+            {team.map((member, i) => (
+              <FadeIn key={i} delay={i * 0.1}>
+                <div className="ab-team-card">
+                  <div className="ab-avatar-ring">
+                    <div className="ab-avatar-inner">
+                      <img
+                        src={member.image || "/default-image.jpg"}
+                        alt={member.name}
+                        onError={(e) => { e.target.style.display = "none"; }}
+                      />
+                    </div>
+                  </div>
+                  <h3 className="ab-team-name">{member.name}</h3>
+                  <p className="ab-team-role">{member.role}</p>
+                  <p className="ab-team-bio">{member.bio}</p>
+                  <a href={member.github} target="_blank" rel="noopener noreferrer" className="ab-team-btn">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
+                    </svg>
+                    GitHub Profile
+                  </a>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
         </div>
-      </div>
+      </section>
 
-      {/* Technology Stack */}
-      <div style={{ 
-        padding: "5rem 2rem", 
-        textAlign: "center",
-        background: colors.primary,
-      }}>
-        <h2
-          style={{ 
-            fontSize: "2.5rem", 
-            fontWeight: "600",
-            color: colors.accent,
-            marginBottom: "3rem",
-            position: "relative",
-            display: "inline-block"
-          }}
-          data-aos="fade-up"
-        >
-          <span style={{
-            position: "relative",
-            zIndex: "1"
-          }}>Technology Stack</span>
-          <div style={{
-            position: "absolute",
-            height: "12px",
-            width: "50%",
-            backgroundColor: colors.tertiary,
-            bottom: "8px",
-            left: "25%",
-            zIndex: "0",
-            opacity: "0.4"
-          }}></div>
-        </h2>
+      <hr className="ab-divider" />
 
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            flexWrap: "wrap",
-            gap: "1.5rem",
-            maxWidth: "1000px",
-            margin: "0 auto",
-          }}
-        >
-          {[
-            "ReactJS",
-            "NodeJS",
-            "ExpressJS",
-            "MongoDB",
-            "Socket.IO",
-            "WebRTC",
-            "Firebase",
-          ].map((tech, idx) => (
-            <div
-              key={idx}
-              style={{
-                background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`,
-                borderRadius: "50px",
-                padding: "0.8rem 1.8rem",
-                color: colors.primary,
-                fontWeight: "600",
-                fontSize: "1.1rem",
-                boxShadow: "0 4px 15px rgba(0,0,0,0.1)",
-                transition: "transform 0.3s, box-shadow 0.3s",
-              }}
-              data-aos="zoom-in"
-              data-aos-delay={idx * 50}
-              onMouseOver={(e) => {
-                e.currentTarget.style.transform = "scale(1.08)";
-                e.currentTarget.style.boxShadow = "0 6px 20px rgba(0,0,0,0.15)";
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.transform = "scale(1)";
-                e.currentTarget.style.boxShadow = "0 4px 15px rgba(0,0,0,0.1)";
-              }}
-            >
-              {tech}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Key Achievements */}
-      <div style={{ 
-        padding: "5rem 2rem", 
-        textAlign: "center",
-        background: `linear-gradient(0deg, ${colors.primary} 0%, ${colors.secondary} 100%)`,
-      }}>
-        <h2
-          style={{ 
-            fontSize: "2.5rem", 
-            fontWeight: "600",
-            color: colors.accent,
-            marginBottom: "3rem",
-            position: "relative",
-            display: "inline-block"
-          }}
-          data-aos="fade-up"
-        >
-          <span style={{
-            position: "relative",
-            zIndex: "1"
-          }}>Key Achievements</span>
-          <div style={{
-            position: "absolute",
-            height: "12px",
-            width: "50%",
-            backgroundColor: colors.tertiary,
-            bottom: "8px",
-            left: "25%",
-            zIndex: "0",
-            opacity: "0.4"
-          }}></div>
-        </h2>
-
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            flexWrap: "wrap",
-            gap: "2.5rem",
-            maxWidth: "1200px",
-            margin: "0 auto",
-          }}
-        >
-          {[
-            {
-              title: "Top 10 Collaboration Tools",
-              description: "Recognized among top 10 collaboration platforms for coders.",
-              icon: "🏆"
-            },
-            {
-              title: "Global Expansion",
-              description: "Users across 50+ countries actively collaborating.",
-              icon: "🌍"
-            },
-            {
-              title: "Innovation Award 2025",
-              description: "Awarded for excellence in real-time communication solutions.",
-              icon: "🎯"
-            },
-          ].map((achievement, idx) => (
-            <div
-              key={idx}
-              style={{
-                background: colors.cardBg,
-                backdropFilter: "blur(10px)",
-                borderRadius: "16px",
-                padding: "2.5rem 2rem",
-                width: "320px",
-                textAlign: "center",
-                border: `1px solid ${colors.tertiary}40`,
-                boxShadow: "0 8px 30px rgba(0,0,0,0.15)",
-                transition: "transform 0.3s",
-              }}
-              data-aos="fade-up"
-              data-aos-delay={idx * 100}
-              onMouseOver={(e) => {
-                e.currentTarget.style.transform = "translateY(-10px)";
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.transform = "translateY(0)";
-              }}
-            >
-              <div style={{
-                fontSize: "3rem",
-                marginBottom: "1.5rem"
-              }}>
-                {achievement.icon}
-              </div>
-              <h3 style={{ 
-                fontSize: "1.6rem", 
-                marginBottom: "1rem",
-                color: colors.accent,
-                fontWeight: "600"
-              }}>
-                {achievement.title}
-              </h3>
-              <p style={{ 
-                fontSize: "1.05rem",
-                lineHeight: "1.6",
-                color: colors.tertiary
-              }}>
-                {achievement.description}
+      {/* ===== WHY WECODE ===== */}
+      <section className="ab-section">
+        <div className="ab-section-inner">
+          <FadeIn>
+            <div className="ab-section-header">
+              <div className="ab-eyebrow">✦ Why WeCode</div>
+              <h2 className="ab-title">Built for modern developers</h2>
+              <p className="ab-subtitle">
+                A complete suite of tools designed for developers who want to collaborate,
+                practice, and level up together.
               </p>
             </div>
-          ))}
-        </div>
-      </div>
+          </FadeIn>
 
-      {/* Community Initiatives */}
-      <div style={{ 
-        padding: "5rem 2rem", 
-        textAlign: "center",
-        background: colors.primary,
-        borderTop: `4px solid ${colors.tertiary}40`,
-      }}>
-        <h2
-          style={{ 
-            fontSize: "2.5rem", 
-            fontWeight: "600",
-            color: colors.accent,
-            marginBottom: "3rem",
-            position: "relative",
-            display: "inline-block"
-          }}
-          data-aos="fade-up"
-        >
-          <span style={{
-            position: "relative",
-            zIndex: "1"
-          }}>Community Initiatives</span>
-          <div style={{
-            position: "absolute",
-            height: "12px",
-            width: "50%",
-            backgroundColor: colors.tertiary,
-            bottom: "8px",
-            left: "25%",
-            zIndex: "0",
-            opacity: "0.4"
-          }}></div>
-        </h2>
-
-        <div style={{
-          maxWidth: "800px",
-          margin: "0 auto",
-          background: `linear-gradient(135deg, ${colors.secondary}40 0%, ${colors.primary} 100%)`,
-          borderRadius: "16px",
-          padding: "3rem",
-          border: `1px solid ${colors.tertiary}40`,
-          boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
-        }} data-aos="fade-up">
-          <p
-            style={{
-              fontSize: "1.2rem",
-              lineHeight: "1.8",
-              color: colors.text,
-              marginBottom: "2rem"
-            }}
-          >
-            WeCode is committed to giving back to the coding community. Through
-            free mentorship programs, open-source contributions, and global
-            hackathons, we strive to build an inclusive environment where every
-            coder, beginner or expert, finds opportunities to grow and excel.
-          </p>
-          <a
-            href="#"
-            style={{
-              display: "inline-block",
-              padding: "1rem 2rem",
-              backgroundColor: colors.accent,
-              color: colors.primary,
-              fontWeight: "600",
-              borderRadius: "30px",
-              textDecoration: "none",
-              fontSize: "1.1rem",
-              transition: "transform 0.2s, box-shadow 0.2s",
-              boxShadow: "0 4px 15px rgba(0,0,0,0.1)",
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.transform = "scale(1.05)";
-              e.currentTarget.style.boxShadow = "0 6px 20px rgba(0,0,0,0.15)";
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.transform = "scale(1)";
-              e.currentTarget.style.boxShadow = "0 4px 15px rgba(0,0,0,0.1)";
-            }}
-          >
-            Join Our Community
-          </a>
+          <div className="ab-cards-grid">
+            {whyCards.map((card, i) => (
+              <FadeIn key={i} delay={i * 0.07}>
+                <div className="ab-card">
+                  <div className="ab-card-icon">{card.icon}</div>
+                  <h3 className="ab-card-title">{card.title}</h3>
+                  <p className="ab-card-desc">{card.desc}</p>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
         </div>
-      </div>
+      </section>
+
+      <hr className="ab-divider" />
+
+      {/* ===== PLATFORM STATS ===== */}
+      <section className="ab-section" style={{ background: "rgba(255,255,255,0.01)" }}>
+        <div className="ab-section-inner">
+          <FadeIn>
+            <div className="ab-section-header center">
+              <div className="ab-eyebrow">✦ By the Numbers</div>
+              <h2 className="ab-title">Platform highlights</h2>
+            </div>
+          </FadeIn>
+
+          <div className="ab-stats-grid">
+            {platformStats.map((s, i) => (
+              <FadeIn key={i} delay={i * 0.07}>
+                <div className="ab-stat-card">
+                  <div className="ab-stat-num">{s.number}</div>
+                  <div className="ab-stat-label">{s.text}</div>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <hr className="ab-divider" />
+
+      {/* ===== TIMELINE ===== */}
+      <section className="ab-section">
+        <div className="ab-section-inner">
+          <FadeIn>
+            <div className="ab-section-header center">
+              <div className="ab-eyebrow">✦ Journey</div>
+              <h2 className="ab-title">Project timeline</h2>
+              <p className="ab-subtitle" style={{ margin: "0 auto" }}>
+                From idea to launch — every milestone that brought WeCode to life.
+              </p>
+            </div>
+          </FadeIn>
+
+          <div className="ab-timeline" style={{ marginTop: "60px" }}>
+            <div className="ab-timeline-line" />
+            {timelineItems.map((item, i) => (
+              <FadeIn key={i} delay={i * 0.1}>
+                <div className="ab-timeline-item">
+                  <div className="ab-timeline-dot" />
+                  <div className="ab-timeline-card">
+                    <div className="ab-timeline-date">{item.date}</div>
+                    <p className="ab-timeline-event">{item.event}</p>
+                  </div>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <hr className="ab-divider" />
+
+      {/* ===== ACHIEVEMENTS ===== */}
+      <section className="ab-section">
+        <div className="ab-section-inner">
+          <FadeIn>
+            <div className="ab-section-header center">
+              <div className="ab-eyebrow">✦ Recognition</div>
+              <h2 className="ab-title">Key achievements</h2>
+            </div>
+          </FadeIn>
+
+          <div className="ab-cards-grid">
+            {achievements.map((a, i) => (
+              <FadeIn key={i} delay={i * 0.1}>
+                <div className="ab-card" style={{ textAlign: "center", paddingTop: "36px" }}>
+                  <div style={{ fontSize: "2.5rem", marginBottom: "20px" }}>{a.icon}</div>
+                  <h3 className="ab-card-title" style={{ fontSize: "17px" }}>{a.title}</h3>
+                  <p className="ab-card-desc">{a.desc}</p>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <hr className="ab-divider" />
+
+      {/* ===== TECH STACK ===== */}
+      <section className="ab-section" style={{ background: "rgba(255,255,255,0.01)" }}>
+        <div className="ab-section-inner">
+          <FadeIn>
+            <div className="ab-section-header center">
+              <div className="ab-eyebrow">✦ Stack</div>
+              <h2 className="ab-title">Technology stack</h2>
+              <p className="ab-subtitle" style={{ margin: "0 auto" }}>
+                Built on battle-tested open-source technologies.
+              </p>
+            </div>
+          </FadeIn>
+
+          <FadeIn delay={0.1}>
+            <div className="ab-tech-grid" style={{ marginTop: "48px" }}>
+              {techStack.map((tech, i) => (
+                <div key={i} className="ab-tech-pill">{tech}</div>
+              ))}
+            </div>
+          </FadeIn>
+        </div>
+      </section>
+
+      {/* ===== CTA ===== */}
+      <section className="ab-cta-section">
+        <div className="ab-cta-glow" />
+        <div className="ab-hero-grid" style={{ opacity: 0.6 }} />
+        <FadeIn>
+          <div className="ab-cta-inner">
+            <div className="ab-eyebrow" style={{ margin: "0 auto 20px" }}>✦ Community</div>
+            <h2 className="ab-cta-title">
+              Join our <span className="ab-gradient-text">community</span>
+            </h2>
+            <p className="ab-cta-subtitle">
+              WeCode is committed to giving back. Through free mentorship programs,
+              open-source contributions, and global hackathons, we build an inclusive
+              environment where every coder finds opportunities to grow.
+            </p>
+            <button className="ab-cta-btn" onClick={() => navigate("/login")}>
+              Get Started — It's Free
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+        </FadeIn>
+      </section>
 
       <Footer />
     </div>

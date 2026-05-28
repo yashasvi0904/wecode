@@ -1,50 +1,10 @@
 import React, { useState, useEffect } from "react";
-import Navbar from "../../Layout1/Navbar";
 import Layout from "../../Layout1/Layout";
 
 const WebDevScreen = () => {
-  // State for animated counters
   const [resourceCount, setResourceCount] = useState(0);
   const [isVisible, setIsVisible] = useState({});
-  
-  // Animation for cards on scroll
-  useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          setIsVisible(prev => ({...prev, [entry.target.id]: true}));
-        }
-      });
-    }, { threshold: 0.2 });
-    
-    const sections = document.querySelectorAll('.category-section');
-    sections.forEach(section => {
-      observer.observe(section);
-    });
-    
-    // Count total resources for counter animation
-    let total = 0;
-    Object.values(resources).forEach(category => {
-      total += category.length;
-    });
-    
-    // Animate counter
-    let count = 0;
-    const interval = setInterval(() => {
-      count += 1;
-      setResourceCount(count);
-      if (count >= total) clearInterval(interval);
-    }, 30);
-    
-    return () => {
-      sections.forEach(section => {
-        observer.unobserve(section);
-      });
-      clearInterval(interval);
-    };
-  }, []);
 
-  // Categories and their resources
   const resources = {
     HTML: [
       { title: "HTML Tutorial for Beginners | Complete HTML with Notes & Code", link: "https://www.youtube.com/watch?v=HcOc7P5BMi4&list=PLfqMhTWNBTe0PY9xunOzsP5kmYIz2Hu7i&index=1&pp=iAQB" }
@@ -107,45 +67,132 @@ const WebDevScreen = () => {
     ]
   };
 
-  // Order of categories to display
   const categoryOrder = ["HTML", "CSS", "Git and GitHub", "JavaScript", "React", "Backend"];
+
+  const categoryIcons = { HTML: "🌐", CSS: "🎨", "Git and GitHub": "🔧", JavaScript: "⚡", React: "⚛️", Backend: "🖥️" };
+
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) setIsVisible(prev => ({ ...prev, [entry.target.id]: true }));
+      });
+    }, { threshold: 0.1 });
+    const sections = document.querySelectorAll(".wc-wd-section");
+    sections.forEach(s => observer.observe(s));
+    let total = 0;
+    Object.values(resources).forEach(cat => { total += cat.length; });
+    let count = 0;
+    const interval = setInterval(() => {
+      count += 1;
+      setResourceCount(count);
+      if (count >= total) clearInterval(interval);
+    }, 30);
+    return () => {
+      sections.forEach(s => observer.unobserve(s));
+      clearInterval(interval);
+    };
+  }, []);
 
   return (
     <Layout>
-      <div className="webdev-container">
-        <Navbar />
-        
-        <div className="hero-section">
-          <h1 className="animated-text">Web Development Learning Path</h1>
-          <p>Comprehensive resources to master modern web development</p>
-          <div className="hero-stats">
-            <div className="stat-item">
-              <span className="stat-number">{resourceCount}</span>
-              <span className="stat-label">Total Resources</span>
+      <style>{`
+        .wc-wd-section { opacity: 0; transform: translateY(28px); transition: opacity 0.7s ease, transform 0.7s ease; }
+        .wc-wd-section.visible { opacity: 1; transform: translateY(0); }
+        .wc-wd-card { background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; min-height: 140px; transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s; position: relative; overflow: hidden; }
+        .wc-wd-card::before { content: ""; position: absolute; left: 0; top: 0; width: 3px; height: 0; background: linear-gradient(to bottom, #6366f1, #8b5cf6); transition: height 0.4s ease; border-radius: 0 0 2px 0; }
+        .wc-wd-card:hover::before { height: 100%; }
+        .wc-wd-card:hover { border-color: rgba(99,102,241,0.25) !important; box-shadow: 0 12px 32px rgba(99,102,241,0.08) !important; transform: translateY(-3px) !important; }
+        .wc-wd-watch:hover { background: linear-gradient(135deg, #4f46e5, #7c3aed) !important; box-shadow: 0 6px 20px rgba(99,102,241,0.4) !important; transform: scale(1.03); }
+        .wc-wd-watch:hover svg { transform: translateX(3px); }
+        .wc-wd-watch svg { transition: transform 0.2s ease; }
+      `}</style>
+
+      <div style={{ maxWidth: "1300px", margin: "0 auto", padding: "40px 24px 80px" }}>
+        {/* Hero */}
+        <div style={{
+          background: "linear-gradient(135deg, rgba(99,102,241,0.12), rgba(139,92,246,0.08))",
+          border: "1px solid rgba(99,102,241,0.2)", borderRadius: "20px",
+          padding: "48px 32px", textAlign: "center", marginBottom: "56px", position: "relative", overflow: "hidden",
+        }}>
+          <div style={{
+            position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)",
+            width: "400px", height: "400px", borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(99,102,241,0.12) 0%, transparent 70%)",
+            pointerEvents: "none",
+          }} />
+          <div style={{
+            display: "inline-flex", alignItems: "center", gap: "6px", padding: "5px 12px",
+            background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.18)",
+            borderRadius: "100px", fontSize: "11px", fontWeight: "700", color: "#a5b4fc",
+            textTransform: "uppercase", letterSpacing: "1px", marginBottom: "16px",
+          }}>
+            ✦ Learning Path
+          </div>
+          <h1 style={{
+            fontSize: "clamp(28px, 4vw, 44px)", fontWeight: "800", letterSpacing: "-1.5px",
+            background: "linear-gradient(135deg, #fafafa, #a5b4fc)", WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent", margin: "0 0 12px", position: "relative",
+          }}>
+            Web Development Learning Path
+          </h1>
+          <p style={{ fontSize: "16px", color: "#a1a1aa", margin: "0 0 28px", position: "relative" }}>
+            Comprehensive resources to master modern web development
+          </p>
+          <div style={{ display: "flex", justifyContent: "center", gap: "32px", flexWrap: "wrap", position: "relative" }}>
+            <div style={{ textAlign: "center" }}>
+              <div style={{ fontSize: "36px", fontWeight: "800", color: "#a5b4fc", lineHeight: 1 }}>{resourceCount}</div>
+              <div style={{ fontSize: "12px", color: "#52525b", textTransform: "uppercase", letterSpacing: "1px", marginTop: "4px" }}>Total Resources</div>
             </div>
-            <div className="stat-item">
-              <span className="stat-number">{categoryOrder.length}</span>
-              <span className="stat-label">Learning Paths</span>
+            <div style={{ textAlign: "center" }}>
+              <div style={{ fontSize: "36px", fontWeight: "800", color: "#a5b4fc", lineHeight: 1 }}>{categoryOrder.length}</div>
+              <div style={{ fontSize: "12px", color: "#52525b", textTransform: "uppercase", letterSpacing: "1px", marginTop: "4px" }}>Learning Paths</div>
             </div>
           </div>
         </div>
 
+        {/* Category Sections */}
         {categoryOrder.map((category, idx) => (
-          <section 
-            key={category} 
-            id={`section-${idx}`} 
-            className={`category-section ${isVisible[`section-${idx}`] ? 'fade-in' : ''}`}
+          <section
+            key={category}
+            id={`section-${idx}`}
+            className={`wc-wd-section${isVisible[`section-${idx}`] ? " visible" : ""}`}
+            style={{ marginBottom: "48px" }}
           >
-            <div className="category-header">
-              <h2>{category}</h2>
+            <div style={{ marginBottom: "20px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "4px" }}>
+                <span style={{ fontSize: "20px" }}>{categoryIcons[category]}</span>
+                <h2 style={{
+                  fontSize: "22px", fontWeight: "700", color: "#fafafa", margin: 0,
+                  paddingBottom: "8px", borderBottom: "2px solid rgba(99,102,241,0.3)",
+                  display: "inline-block",
+                }}>
+                  {category}
+                </h2>
+              </div>
+              <p style={{ fontSize: "13px", color: "#52525b", margin: "4px 0 0 30px" }}>
+                {resources[category].length} resource{resources[category].length !== 1 ? "s" : ""}
+              </p>
             </div>
-            <div className="resource-grid">
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "14px" }}>
               {resources[category].map((resource, index) => (
-                <div key={index} className="resource-card">
-                  <h3>{resource.title}</h3>
-                  <a href={resource.link} target="_blank" rel="noopener noreferrer" className="watch-btn">
+                <div key={index} className="wc-wd-card">
+                  <h3 style={{ fontSize: "14px", fontWeight: "600", color: "#fafafa", lineHeight: "1.5", margin: "0 0 16px" }}>
+                    {resource.title}
+                  </h3>
+                  <a
+                    href={resource.link} target="_blank" rel="noopener noreferrer"
+                    className="wc-wd-watch"
+                    style={{
+                      display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
+                      padding: "9px 16px", borderRadius: "8px",
+                      background: "linear-gradient(135deg, #6366f1, #8b5cf6)", color: "#fff",
+                      textDecoration: "none", fontWeight: "600", fontSize: "13px",
+                      transition: "all 0.2s ease", boxShadow: "0 4px 14px rgba(99,102,241,0.3)",
+                    }}
+                  >
                     <span>Watch Now</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <polygon points="5 3 19 12 5 21 5 3"></polygon>
                     </svg>
                   </a>
@@ -154,279 +201,6 @@ const WebDevScreen = () => {
             </div>
           </section>
         ))}
-
-        <style jsx>{`
-          .webdev-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            color: #213448;
-          }
-          
-          .hero-section {
-            background: linear-gradient(135deg, #547792 0%, #213448 100%);
-            padding: 3rem 2rem;
-            text-align: center;
-            border-radius: 8px;
-            margin: 1rem 0 3rem;
-            color: #FFFFFF;
-            box-shadow: 0 4px 16px rgba(33, 52, 72, 0.3);
-            position: relative;
-            overflow: hidden;
-          }
-          
-          .hero-section:before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 60%);
-            animation: pulse 8s infinite alternate;
-          }
-          
-          @keyframes pulse {
-            0% { transform: scale(0.8); opacity: 0.3; }
-            100% { transform: scale(1.2); opacity: 0.1; }
-          }
-          
-          .hero-section h1 {
-            font-size: 3rem;
-            margin-bottom: 0.8rem;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            position: relative;
-            display: inline-block;
-            color: #FFFFFF;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-          }
-          
-          .animated-text {
-            background: linear-gradient(45deg, #FFFFFF, #94B4C1, #FFFFFF);
-            background-size: 200% 200%;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: gradientBG 6s ease infinite;
-          }
-          
-          @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-          }
-          
-          .hero-section p {
-            font-size: 1.3rem;
-            opacity: 0.9;
-            margin-bottom: 2rem;
-          }
-          
-          .hero-stats {
-            display: flex;
-            justify-content: center;
-            gap: 3rem;
-            margin-top: 1.5rem;
-          }
-          
-          .stat-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-          }
-          
-          .stat-number {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 0.3rem;
-            color: #ECEFCA;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-          }
-          
-          .stat-label {
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            opacity: 0.8;
-          }
-          
-          .category-section {
-            margin-bottom: 3rem;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.8s ease-out;
-          }
-          
-          .category-section.fade-in {
-            opacity: 1;
-            transform: translateY(0);
-          }
-          
-          .category-header {
-            position: relative;
-            margin-bottom: 1.5rem;
-            text-align: center;
-          }
-          
-          .category-header h2 {
-            font-size: 2rem;
-            color: #213448;
-            font-weight: 700;
-            display: inline-block;
-            padding-bottom: 0.5rem;
-            border-bottom: 4px solid #547792;
-            position: relative;
-          }
-          
-          .category-header h2:after {
-            content: "";
-            position: absolute;
-            bottom: -4px;
-            left: 0;
-            width: 0;
-            height: 4px;
-            background-color: #94B4C1;
-            transition: width 0.6s ease;
-          }
-          
-          .category-section.fade-in .category-header h2:after {
-            width: 100%;
-          }
-          
-          .resource-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 1.2rem;
-          }
-          
-          .resource-card {
-            background: linear-gradient(145deg, #FFFFFF, #F8F9FA);
-            border-radius: 8px;
-            padding: 1.5rem 1.2rem;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 8px rgba(84, 119, 146, 0.15);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            height: 100%;
-            min-height: 150px;
-            border-left: 4px solid #94B4C1;
-            position: relative;
-            overflow: hidden;
-          }
-          
-          .resource-card:before {
-            content: "";
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 4px;
-            height: 0;
-            background: linear-gradient(to bottom, #213448, #547792);
-            transition: height 0.4s ease;
-          }
-          
-          .resource-card:hover:before {
-            height: 100%;
-          }
-          
-          .resource-card:hover {
-            box-shadow: 0 8px 16px rgba(84, 119, 146, 0.25);
-            transform: translateY(-4px) scale(1.02);
-          }
-          
-          .resource-card h3 {
-            font-size: 1rem;
-            margin-bottom: 1rem;
-            line-height: 1.4;
-            font-weight: 600;
-            color: #213448;
-          }
-          
-          .watch-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            background-color: #547792;
-            color: #FFFFFF;
-            text-decoration: none;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            margin-top: auto;
-            position: relative;
-            overflow: hidden;
-          }
-          
-          .watch-btn:after {
-            content: "";
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 10px;
-            height: 10px;
-            background: rgba(255, 255, 255, 0.3);
-            opacity: 0;
-            border-radius: 100%;
-            transform: scale(1, 1) translate(-50%);
-            transform-origin: 50% 50%;
-          }
-          
-          .watch-btn:hover:after {
-            animation: ripple 1s ease-out;
-          }
-          
-          @keyframes ripple {
-            0% {
-              transform: scale(0, 0);
-              opacity: 0.5;
-            }
-            100% {
-              transform: scale(20, 20);
-              opacity: 0;
-            }
-          }
-          
-          .watch-btn:hover {
-            background-color: #213448;
-            transform: scale(1.05);
-            box-shadow: 0 4px 8px rgba(33, 52, 72, 0.3);
-          }
-          
-          .watch-btn svg {
-            transition: transform 0.3s ease;
-          }
-          
-          .watch-btn:hover svg {
-            transform: translateX(3px);
-          }
-          
-          @media (max-width: 768px) {
-            .resource-grid {
-              grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-            }
-            
-            .hero-section h1 {
-              font-size: 2rem;
-            }
-            
-            .hero-stats {
-              flex-direction: column;
-              gap: 1rem;
-            }
-          }
-          
-          @media (max-width: 480px) {
-            .resource-grid {
-              grid-template-columns: 1fr;
-            }
-            
-            .animated-text {
-              font-size: 1.8rem;
-            }
-          }
-        `}</style>
       </div>
     </Layout>
   );

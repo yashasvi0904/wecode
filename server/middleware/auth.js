@@ -12,16 +12,19 @@ const verifyToken = async (req, res, next) => {
     }
     // console.log(accessToken, refreshToken);
     
-    const decodedAccessToken = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
+    let decodedAccessToken;
+    try {
+        decodedAccessToken = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
+    } catch {
+        return res.status(401).json({ message: "Invalid or expired access token." });
+    }
 
-    const user = await User.findById(decodedAccessToken.id).select('-password'); 
+    const user = await User.findById(decodedAccessToken.id).select('-password');
 
     if (!user) {
         return res.status(401).json({ message: "User not found." });
     }
     req.user = user;
-    
-        
 
     next();
 };
