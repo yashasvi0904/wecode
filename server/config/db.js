@@ -9,7 +9,7 @@ let retryCount = 0;
 const connectDB = async () => {
     try {
         await mongoose.connect(
-            "mongodb+srv://WeCode_Users:WeCode234@wecode.9w3wipp.mongodb.net/WeCode?retryWrites=true&w=majority&appName=WeCode",
+            // mongoose credentials,
             {
                 serverSelectionTimeoutMS: 5000,
                 socketTimeoutMS: 45000,
